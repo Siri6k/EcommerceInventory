@@ -17,5 +17,6 @@ pillow==11.1.0
 platformdirs==4.3.6
 pycodestyle==2.12.1
 PyJWT==2.10.1
+python-dotenv==1.0.1
 sqlparse==0.5.3
 tzdata==2025.1
