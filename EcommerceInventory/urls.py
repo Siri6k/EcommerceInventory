@@ -1,7 +1,6 @@
-from operator import index
+# Removed unused 'index' import from operator
 from django.contrib import admin
 from django.urls import path, include, re_path
-from telegram import Document
 
 from UserServices.Controller.SidebarController import (
     ModuleView,
