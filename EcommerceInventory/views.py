@@ -32,7 +32,7 @@ class FileUploadViewInS3(APIView):
             ).client("s3")
         
             uniqueFileName=os.urandom(24).hex()+"_"+file_obj.name.replace(" ", "_")
-            file_path="/uploads/"+uniqueFileName
+            file_path="uploads/"+uniqueFileName
 
             s3_client.upload_fileobj(
                 file_obj,
