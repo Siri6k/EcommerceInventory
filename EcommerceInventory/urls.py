@@ -13,7 +13,7 @@ from UserServices.Controller.DynamicFormController import DynamicFormController
 from EcommerceInventory import settings
 from django.conf.urls.static import static
 
-from EcommerceInventory.views import index
+from EcommerceInventory.views import FileUploadViewInS3, index
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -34,6 +34,11 @@ urlpatterns = [
         name="sidebarmenu",
     ),
     path("api/products/", include("ProductServices.urls")),
+    path(
+        "api/uploads/",
+        FileUploadViewInS3.as_view(),
+        name="fileupload",
+    ),
 ]
 
 if settings.DEBUG:
