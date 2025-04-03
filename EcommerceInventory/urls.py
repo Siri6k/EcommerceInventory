@@ -24,6 +24,11 @@ urlpatterns = [
         name="dynamicForm",
     ),
     path(
+        "api/getForm/<str:modelName>/<str:id>/",
+        DynamicFormController.as_view(),
+        name="dynamicForm",
+    ),
+    path(
         "api/superAdminForm/<str:modelName>/",
         SuperAdminDynamicFormController.as_view(),
         name="SuperAdmindynamicForm",

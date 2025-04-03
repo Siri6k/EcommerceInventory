@@ -9,6 +9,9 @@ from rest_framework.exceptions import (
 )
 from rest_framework.pagination import PageNumberPagination
 
+from django.forms.models import model_to_dict
+
+
 def getDynamicFormModels():
     return {
         "product": "ProductServices.Products",
@@ -111,6 +114,10 @@ def getDynamicFormFields(model_instance, domain_user_id):
                     {"id": option[0], "value": option[1]} for option in options
                 ]
                 fielddata["type"] = "select"
+                field_defaults = model_to_dict(model_instance)
+                fielddata["default"] = (
+                    field_defaults[field.name] if field.name in field_defaults else ''
+                )
         fields[fielddata["type"]].append(fielddata)
     return fields
 

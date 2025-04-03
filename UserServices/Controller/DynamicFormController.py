@@ -24,7 +24,7 @@ class DynamicFormController(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, modelName):
+    def post(self, request, modelName, id=None):
         # Checking if model Name exists in the models
         if modelName not in getDynamicFormModels():
             return renderResponse(
@@ -104,8 +104,24 @@ class DynamicFormController(APIView):
           
         fieldsdata["domain_user_id"] = request.user.domain_user_id        
         fieldsdata["added_by_user_id"] = Users.objects.get(id=request.user.id)
-        
-        model_instance = model_class.objects.create(**fieldsdata)
+
+        if id:
+            model_instance = model_class.objects.filter(
+                id=id, 
+                domain_user_id=request.user.domain_user_id
+            )
+            if not model_instance.exists():
+                return renderResponse(
+                    data='ModelItem Not Found',
+                    message='Model Item Not Found',
+                    status=404
+                )
+            model_instance = model_instance.first()
+            for key, value in fieldsdata.items():
+                setattr(model_instance, key, value)
+            model_instance.save()
+        else:
+            model_instance = model_class.objects.create(**fieldsdata)
 
         serialized_data = serializer("json", [model_instance])
         model_json = json.loads(serialized_data)
@@ -117,8 +133,9 @@ class DynamicFormController(APIView):
             status=201
         )
         
+####################################################
 
-    def get(self, request, modelName):
+    def get(self, request, modelName, id=None):
         if modelName not in getDynamicFormModels():
             return renderResponse(
                 data="Model Not Exist", 
@@ -134,8 +151,24 @@ class DynamicFormController(APIView):
                 message="Model Not Found", 
                 status=404
             )
+        
+        if id:
+            model_instance = model_class.objects.filter(
+                id=id, 
+                domain_user_id=request.user.domain_user_id
+            )
+            if model_instance.exists():
+                model_instance = model_instance.first()
+            else:
+                return renderResponse(
+                    data='ModelItem Not Found',
+                    message='Model Item Not Found',
+                    status=404
+                )
 
-        model_instance = model_class()
+        else:
+            model_instance = model_class()
+
         fields = getDynamicFormFields(
             model_instance, request.user.domain_user_id)
         
