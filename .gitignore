@@ -6,6 +6,9 @@
 staticfiles
 mediafiles
 client/node_modules
+node_modules
+__pycache__
+
 *.docx
 # Byte-compiled / optimized / DLL files
 __pycache__/
