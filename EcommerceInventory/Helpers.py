@@ -10,6 +10,9 @@ from rest_framework.exceptions import (
 from rest_framework.pagination import PageNumberPagination
 
 from django.forms.models import model_to_dict
+from functools import wraps
+from django.db import models
+from django.db.models import Q
 
 
 def getDynamicFormModels():
@@ -181,3 +184,70 @@ def custom_exception_handler(exc, context):
 class CustomPageNumberPagination(PageNumberPagination):
     page_size_query_param = "pageSize"
     max_page_size = 100
+
+
+
+class CommonListAPIMixin:
+    serializer_class = None
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        raise NotImplementedError("get_queryset not implemented")
+    
+    def common_list_decorator(serializer_class):
+        def decorator(list_method):
+            @wraps(list_method)
+            def wrapped_list_method(self, request, *args, **kwargs):
+                queryset = self.get_queryset()
+                search_query = self.request.query_params.get('search', None)
+
+                if search_query:
+                    search_conditions = Q()
+
+                    for field in serializer_class.Meta.model._meta.get_fields():
+                        if isinstance(field, (models.CharField, models.TextField)):
+                            search_conditions|=Q(**{f"{field.name}__icontains":search_query})
+                    
+                    queryset=queryset.filter(search_conditions)
+
+                ordering=self.request.query_params.get("ordering", None)
+
+                if ordering:
+                    queryset=queryset.order_by(ordering)
+
+                page = self.paginate_queryset(queryset)
+
+                print(page)
+
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    data=serializer.data
+                    total_pages=self.paginator.page.paginator.num_pages
+                    current_page=self.paginator.page.number
+                    page_size=self.paginator.page.paginator.per_page
+                    total_items=self.paginator.page.paginator.count
+                else:
+                    serializer = self.get_serializer(queryset, many=True)
+                    data=serializer.data
+                    total_pages=1
+                    current_page=1
+                    page_size=len(data)
+                    total_items=len(data)
+
+                return renderResponse(
+                    data={
+                        "data":data,
+                    'totalPages': total_pages,
+                    'totalItems': total_items,
+                    'currentPage': current_page,
+                    'pageSize': page_size
+                    },
+                    message="Data Retrieved Successfully",
+                    status=200
+                )
+            return wrapped_list_method
+        return decorator
+    
+
+
+
