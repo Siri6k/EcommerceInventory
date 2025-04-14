@@ -32,6 +32,7 @@ class CategoryListView(generics.ListAPIView):
     serializer_class = CategorySerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         queryset = Categories.objects.filter(parent_id__isnull=True).filter(

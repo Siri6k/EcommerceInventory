@@ -32,13 +32,12 @@ class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-
+    pagination_class = CustomPageNumberPagination
+    
     def get_queryset(self):
         queryset = Products.objects.filter(
             domain_user_id=self.request.user.domain_user_id.id
         )
-        search_query = self.request.query_params.get('search', None)
-
         return queryset
     
      #using the mixin to add search and ordering functionality
