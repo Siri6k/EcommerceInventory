@@ -1,5 +1,5 @@
 from django.urls import path
-from UserServices.Controller import AuthController
+from UserServices.Controller import AuthController, UserController
 
 
 urlpatterns = [
@@ -8,5 +8,7 @@ urlpatterns = [
     path("publicApi/", AuthController.PublicAPIView.as_view(), name="public"),
     path("protectedApi/", AuthController.ProtectedAPIView.as_view(), name="protected"),
     path("superadminurl/", AuthController.SuperAdminCheckApi.as_view(), name="superadmin"),
+    path("users/", UserController.UserListView.as_view(), name="user_list"),
+
 
 ]
