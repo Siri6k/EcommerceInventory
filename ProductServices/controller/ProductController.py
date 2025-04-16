@@ -13,13 +13,32 @@ from EcommerceInventory.Helpers import (
 from ProductServices.models import ProductQuestions, ProductReviews, Products
 
 class ProductReviewSerializer(serializers.ModelSerializer):
+    review_user_id= serializers.SerializerMethodField()
+    domain_user_id= serializers.SerializerMethodField()
     class Meta:
         model = ProductReviews
         fields = '__all__'
+    
+    def get_review_user_id(self, obj):
+        return "#"+str(obj.review_user_id.id)+" "+obj.review_user_id.username
+    
+    def get_domain_user_id(self, obj):
+        return "#"+str(obj.domain_user_id.id)+" "+obj.domain_user_id.username
+
 class ProductQuestionSerializer(serializers.ModelSerializer):
+    domain_user_id= serializers.SerializerMethodField()
+    question_user_id= serializers.SerializerMethodField()
+    answer_user_id= serializers.SerializerMethodField()
     class Meta:
         model = ProductQuestions
         fields = '__all__'
+
+    def get_domain_user_id(self, obj):
+        return "#"+str(obj.domain_user_id.id)+" "+obj.domain_user_id.username
+    def get_question_user_id(self, obj):
+        return "#"+str(obj.question_user_id.id)+" "+obj.question_user_id.username
+    def get_answer_user_id(self, obj):
+        return "#"+str(obj.answer_user_id.id)+" "+obj.answer_user_id.username
 
 class ProductSerializer(serializers.ModelSerializer):
     category_id= serializers.SerializerMethodField()
