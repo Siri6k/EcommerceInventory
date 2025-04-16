@@ -66,7 +66,8 @@ class ProductReviewListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = ProductReviews.objects.filter(
-            domain_user_id=self.request.user.domain_user_id.id
+            domain_user_id=self.request.user.domain_user_id.id,
+            product_id=self.kwargs['product_id']
         )
         return queryset
     
@@ -84,7 +85,8 @@ class ProductQuestionsListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = ProductQuestions.objects.filter(
-            domain_user_id=self.request.user.domain_user_id.id
+            domain_user_id=self.request.user.domain_user_id.id,
+            product_id=self.kwargs['product_id']
         )
         return queryset
     
