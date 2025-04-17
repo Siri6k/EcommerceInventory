@@ -21,6 +21,7 @@ def getDynamicFormModels():
         "category": "ProductServices.Categories",
         "warehouse": "InventoryServices.Warehouse",
         "supplier": "UserServices.Users",
+        "rackShelfFloor": "InventoryServices.RackAndShelvesAndFloor",
 
     }
 
@@ -248,6 +249,28 @@ class CommonListAPIMixin:
             return wrapped_list_method
         return decorator
     
+# decorator for timestamp fields
+def createParsedCreatedAtUpdatedAt(cls):
+    cls.formatted_created_at=serializers.SerializerMethodField()
+    cls.formatted_updated_at=serializers.SerializerMethodField()
 
+    def get_formatted_created_at(self,obj):
+        return obj.created_at.strftime('%dth %B %Y, %H:%M')
+    
+    def get_formatted_updated_at(self,obj):
+        return obj.updated_at.strftime('%dth %B %Y, %H:%M')
+    
+    cls.get_formatted_created_at=get_formatted_created_at
+    cls.get_formatted_updated_at=get_formatted_updated_at
 
+    original_to_representation=cls.to_representation
 
+    @wraps(original_to_representation)
+    def to_representation(self,obj):
+        representation=original_to_representation(self,obj)
+        representation['created_at']=self.get_formatted_created_at(obj)
+        representation['updated_at']=self.get_formatted_updated_at(obj)
+        return representation
+    
+    cls.to_representation=to_representation
+    return cls

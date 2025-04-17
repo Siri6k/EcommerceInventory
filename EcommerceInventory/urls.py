@@ -39,6 +39,7 @@ urlpatterns = [
         name="sidebarmenu",
     ),
     path("api/products/", include("ProductServices.urls")),
+    path("api/inventory/", include("InventoryServices.urls")),
     path(
         "api/uploads/",
         FileUploadViewInS3.as_view(),
