@@ -101,13 +101,21 @@ WSGI_APPLICATION = "EcommerceInventory.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Database settings using environment variables
+host = 'localhost'
+if not DEBUG:
+    host = os.getenv('DATABASE_HOST')
+    
+
+print("Host: ", host)
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": os.getenv('DATABASE_NAME'),
         "USER": os.getenv('DATABASE_USER'),
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        "HOST": os.getenv('DATABASE_HOST'),
+        "HOST": host,
         "PORT": os.getenv('DATABASE_PORT'),
     }
 }
