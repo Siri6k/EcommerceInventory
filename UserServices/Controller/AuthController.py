@@ -67,7 +67,7 @@ class LoginAPIView(APIView):
             access = refresh.access_token
             access["username"] = user.username
             access["email"] = user.email
-            access["profile_pic"] = user.profile_pic.url if user.profile_pic else ""
+            access["profile_pic"] = user.profile_pic if user.profile_pic else ""
             access["role"] = user.role
 
             return Response(

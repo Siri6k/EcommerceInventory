@@ -9,6 +9,9 @@ urlpatterns = [
     path("protectedApi/", AuthController.ProtectedAPIView.as_view(), name="protected"),
     path("superadminurl/", AuthController.SuperAdminCheckApi.as_view(), name="superadmin"),
     path("users/", UserController.UserListView.as_view(), name="user_list"),
+    path("userList/", UserController.UserWithFiltersListView.as_view(), name="user_list_filter"),
+    path("updateUser/<pk>/", UserController.UpdateUsers.as_view(), name="user_update"),
+
 
 
 ]

@@ -5,7 +5,6 @@ from django.contrib.auth.hashers import make_password
 
 # Create your models here.
 class Users(AbstractUser):
-    name = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField()
@@ -24,8 +23,7 @@ class Users(AbstractUser):
             ("Burundi", "Burundi"),
         ),
     )
-    profile_pic = models.ImageField(
-        upload_to="profile_pics/", blank=True, null=True)
+    profile_pic = models.JSONField()
     account_status = models.CharField(
         max_length=50,
         blank=True,
@@ -47,8 +45,7 @@ class Users(AbstractUser):
             ("Supplier", "Supplier"),
             ("Customer", "Customer"),
             ("Staff", "Staff"),
-            ("Manager", "Manager"),
-            ("Super Admin", "Super Admin"),
+           
         ),
     )
     dob = models.DateField(blank=True, null=True)
@@ -194,6 +191,13 @@ class Users(AbstractUser):
     def save(self, *args, **kwargs):
         if not self.domain_user_id and self.id:
             self.domain_user_id = Users.objects.get(id=self.id)
+        if (
+            not self.pk or 
+            Users.objects.filter(pk=self.pk)
+            .values('password')
+            .first()['password'] != self.password
+        ):
+            self.password = make_password(self.password)
         super().save(*args, **kwargs)
 
 

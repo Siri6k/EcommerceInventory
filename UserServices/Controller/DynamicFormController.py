@@ -7,17 +7,22 @@ from EcommerceInventory.Helpers import (
     getExcludeFields,
     renderResponse,
 )
+
+import datetime
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from django.core.serializers import serialize as serializer
+from django.core.serializers import serialize
 import json
 from django.apps import apps
 
 from UserServices.models import Users
+
+from django.db import models
 
 
 class DynamicFormController(APIView):
@@ -101,10 +106,24 @@ class DynamicFormController(APIView):
             elif field.is_relation and field.name in fieldsdata:
                 fieldsdata.pop(field.name)
 
+        for field in field_info:
+              if field.name in fieldsdata:
+                # Convertir les chaînes vides pour les dates
+                if isinstance(
+                    field, (models.DateField, models.DateTimeField)
+                ) and fieldsdata[field.name] == "":
+                    fieldsdata[field.name] = None
+
+
           
         fieldsdata["domain_user_id"] = request.user.domain_user_id        
         fieldsdata["added_by_user_id"] = Users.objects.get(id=request.user.id)
 
+
+
+        # Handle empty date strings
+        
+        # checking if the model instance exists or not
         if id:
             model_instance = model_class.objects.filter(
                 id=id, 
@@ -123,10 +142,12 @@ class DynamicFormController(APIView):
         else:
             model_instance = model_class.objects.create(**fieldsdata)
 
-        serialized_data = serializer("json", [model_instance])
+        serialized_data = serialize("json", [model_instance])
         model_json = json.loads(serialized_data)
         response_json = model_json[0]["fields"]
         response_json["id"] = model_json[0]["pk"]
+
+       
         return renderResponse(
             data=response_json, 
             message="Data saved successfully", 

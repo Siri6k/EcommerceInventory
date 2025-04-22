@@ -14,6 +14,9 @@ from functools import wraps
 from django.db import models
 from django.db.models import Q
 
+from datetime import date, datetime
+from django.utils import timezone
+
 
 def getDynamicFormModels():
     return {
@@ -22,6 +25,8 @@ def getDynamicFormModels():
         "warehouse": "InventoryServices.Warehouse",
         "supplier": "UserServices.Users",
         "rackShelfFloor": "InventoryServices.RackAndShelvesAndFloor",
+        "users": "UserServices.Users",
+
 
     }
 
@@ -33,7 +38,7 @@ def getSuperAdminDynamicFormModels():
 
 
 def checkIsFiledFields(field):
-    return field in ["image", "file", "path", "video", "audio"]
+    return field in ["image", "file", "path", "video", "audio", "profile_pic"]
 
 
 def getExcludeFields():
@@ -45,9 +50,16 @@ def getExcludeFields():
         "added_by_user_id",
         "created_by_user_id",
         "updated_by_user_id",
+        "domain_name",
+        "plan_type",
+        "last_login",
+        "last_device",
+        "last_ip",
+        "is_active",
+        "is_superuser",
+        "is_staff",
+        "date_joined",
     ]
-
-
 def getDynamicFormFields(model_instance, domain_user_id):
     fields = {
         "text": [],
@@ -74,6 +86,8 @@ def getDynamicFormFields(model_instance, domain_user_id):
             ),
             "required": not field.null,
         }
+
+      
         if checkIsFiledFields(field.name):
             fielddata["type"] = "file"
         elif field.get_internal_type() == "TextField":
@@ -87,16 +101,17 @@ def getDynamicFormFields(model_instance, domain_user_id):
             ]
 
         elif (
-            field.get_internal_type() == "CharField"
-            or field.get_internal_type() == "IntegerField"
+            field.get_internal_type() == 'CharField' or
+            field.get_internal_type() == 'IntegerField' or
+            field.get_internal_type() == 'DecimalField' or
+            field.get_internal_type() == 'FloatField'
         ):
-            fielddata["type"] = "text"
+            fielddata['type'] = 'text'
         elif (
             field.get_internal_type() == "BooleanField"
             or field.get_internal_type() == "NullBooleanField"
         ):
             fielddata["type"] = "checkbox"
-
         else:
             fielddata["type"] = "text"
             if isinstance(field, ForeignKey):
@@ -108,7 +123,9 @@ def getDynamicFormFields(model_instance, domain_user_id):
                     related_key_name = related_model.defaultkey()
                     options = related_model.objects.filter(
                         domain_user_id=domain_user_id
-                    ).values_list("id", related_key_name, related_model.defaultkey())
+                    ).values_list(
+                        "id", related_key_name, related_model.defaultkey()
+                    )
                 else:
                     related_key_name = related_model._meta.pk.name
                     options = related_model.objects.filter(
@@ -124,7 +141,6 @@ def getDynamicFormFields(model_instance, domain_user_id):
                 )
         fields[fielddata["type"]].append(fielddata)
     return fields
-
 
 def renderResponse(message, data, status=200):
     if status >= 200 and status < 300:
@@ -274,3 +290,92 @@ def createParsedCreatedAtUpdatedAt(cls):
     
     cls.to_representation=to_representation
     return cls
+
+
+class CommonListAPIMixinWithFilter:
+    serializer_class = None
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        raise NotImplementedError("get_queryset not implemented")
+    
+    def common_list_decorator(serializer_class):
+        def decorator(list_method):
+            @wraps(list_method)
+            def wrapped_list_method(self, request, *args, **kwargs):
+                queryset = self.get_queryset()
+                search_query = self.request.query_params.get('search', None)
+
+                filtered_params = self.request.query_params.dict()
+                key_to_remove = ['search', 'page', 'pageSize', 'ordering']
+                for key in key_to_remove:
+                    if key in filtered_params:
+                        filtered_params.pop(key, None)
+                
+                if filtered_params:
+                    search_conditions = Q()
+                    for key, value in filtered_params.items():
+                        ##search_conditions |= Q(**{f"{key}": value}) Or search
+                        search_conditions &= Q(**{f"{key}": value}) # And search
+                    queryset = queryset.filter(search_conditions)
+
+
+                if search_query:
+                    search_conditions = Q()
+
+                    for field in serializer_class.Meta.model._meta.get_fields():
+                        if isinstance(field, (models.CharField, models.TextField)):
+                            search_conditions|=Q(**{f"{field.name}__icontains":search_query})
+                    
+                    queryset=queryset.filter(search_conditions)
+
+                ordering=self.request.query_params.get("ordering", None)
+
+                if ordering:
+                    queryset=queryset.order_by(ordering)
+
+                page = self.paginate_queryset(queryset)
+
+                print(page)
+
+                if page is not None:
+                    serializer = self.get_serializer(page, many=True)
+                    data=serializer.data
+                    total_pages=self.paginator.page.paginator.num_pages
+                    current_page=self.paginator.page.number
+                    page_size=self.paginator.page.paginator.per_page
+                    total_items=self.paginator.page.paginator.count
+                else:
+                    serializer = self.get_serializer(queryset, many=True)
+                    data=serializer.data
+                    total_pages=1
+                    current_page=1
+                    page_size=len(data)
+                    total_items=len(data)
+                
+                filterFields = [
+                    {
+                        "key": field.name,
+                        "option": [
+                            {"id": choice[0], "value": choice[1]} 
+                            for choice in field.choices
+                        ] if field.choices else None
+                    }
+                    for field in serializer_class.Meta.model._meta.fields
+                    if field.name in serializer_class.Meta.fields 
+                ]
+
+                return renderResponse(
+                    data={
+                    "filterFields": filterFields,
+                    "data":data,
+                    'totalPages': total_pages,
+                    'totalItems': total_items,
+                    'currentPage': current_page,
+                    'pageSize': page_size
+                    },
+                    message="Data Retrieved Successfully",
+                    status=200
+                )
+            return wrapped_list_method
+        return decorator
