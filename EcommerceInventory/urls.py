@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 
 from UserServices.Controller.SidebarController import (
-    ModuleView,
+    ModuleView, ModuleUrlsListAPIView
 )
 from UserServices.Controller.ModuleController import (
     SuperAdminDynamicFormController,
@@ -32,6 +32,11 @@ urlpatterns = [
         "api/superAdminForm/<str:modelName>/",
         SuperAdminDynamicFormController.as_view(),
         name="SuperAdmindynamicForm",
+    ),
+    path(
+        "api/moduleUrls/",
+        ModuleUrlsListAPIView.as_view(),
+        name="moduleUrls_superadmin",
     ),
     path(
         "api/getMenus/",

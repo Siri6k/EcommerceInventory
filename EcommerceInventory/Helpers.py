@@ -1,5 +1,7 @@
+import json
 from django.db.models import ForeignKey
 
+from django.urls import URLPattern
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework.exceptions import (
@@ -11,11 +13,14 @@ from rest_framework.pagination import PageNumberPagination
 
 from django.forms.models import model_to_dict
 from functools import wraps
-from django.db import models
+from django.db import connection, models
 from django.db.models import Q
 
 from datetime import date, datetime
 from django.utils import timezone
+from django.urls.resolvers import (URLPattern, get_resolver, URLResolver)
+from django.core.serializers import serialize
+
 
 
 def getDynamicFormModels():
@@ -379,3 +384,36 @@ class CommonListAPIMixinWithFilter:
                 )
             return wrapped_list_method
         return decorator
+    
+
+def list_project_urls(patterns,parent_pattern=""):
+    url_list=[]
+    for pattern in patterns:
+        if isinstance(pattern, URLPattern):
+            url_list.append("/"+parent_pattern+str(pattern.pattern))
+        elif isinstance(pattern, URLResolver):
+            url_list.extend(list_project_urls(
+                pattern.url_patterns, 
+                parent_pattern=parent_pattern+str(pattern.pattern)
+                )) 
+    return url_list
+
+def convertModeltoJSON(model):
+    serialized_model = serialize('json', model)
+    serializers_data = json.loads(serialized_model)
+    modelItems=[]
+    for data in serializers_data:
+        data['fields']['id'] = data['pk']
+        modelItems.append(data['fields'])
+    return modelItems
+    
+
+
+
+def executeQuery(query, params):
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        colums = [col[0] for col in cursor.description]
+        return [dict(zip(colums, row)) for row in cursor.fetchall()]
+
+        

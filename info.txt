@@ -1,0 +1,14 @@
+SELECT 
+	userservices_modules.module_name,
+    userservices_modules.id AS module_id,
+    userservices_modules.parent_id_id,
+    COALESCE(userservices_userpermissions.is_permission,0)
+    userservices_userpermissions.user_id,
+    userservices_userpermissions.domain_user_id_id 
+    FROM 
+    	`userservices_modules` 
+    LEFT JOIN 
+    	userservices_userpermissions 
+    on 
+    	userservices_userpermissions.module_id=userservices_modules.id AND
+        userservices_userpermissions.user_id=1

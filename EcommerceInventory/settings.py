@@ -64,6 +64,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    # Your other middlewares...
+    "EcommerceInventory.middleware.PermissionMiddleware.PermissionMiddleware",
+
 ]
 
 REST_FRAMEWORK = {
