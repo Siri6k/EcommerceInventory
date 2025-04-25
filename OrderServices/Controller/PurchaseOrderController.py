@@ -102,7 +102,7 @@ class CreatePurchaseOrderView(generics.CreateAPIView):
             return renderResponse(
                 data=serializer.data,
                 message="Purchase Order Created",
-                status=200
+                status=201
             )
         return renderResponse(
             data=serializer.errors,
