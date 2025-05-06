@@ -104,18 +104,16 @@ WSGI_APPLICATION = "EcommerceInventory.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv('DATABASE_NAME'),
-        "USER": os.getenv('DATABASE_USER'),
-        "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        "HOST": os.getenv('DATABASE_HOST'), 
-        "PORT": os.getenv('DATABASE_PORT'),
+        "NAME": os.getenv('DATABASE_NAME', 'ecommerce'),  # Default database name
+        "USER": os.getenv('DATABASE_USER', 'ecommerce'),         # Default user
+        "PASSWORD": os.getenv('DATABASE_PASSWORD', ''),     # Default empty password
+        "HOST": os.getenv('DATABASE_HOST', 'localhost'),    # Default host
+        "PORT": os.getenv('DATABASE_PORT', '3306'),         # Default port
         'OPTIONS': {
             'charset': 'utf8mb4',
-            # For Render.com, force TCP connection even if localhost
             'unix_socket': None if not DEBUG else '/run/mysqld/mysqld.sock'
         }
     }
