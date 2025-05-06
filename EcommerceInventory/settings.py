@@ -104,13 +104,6 @@ WSGI_APPLICATION = "EcommerceInventory.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Database settings using environment variables
-host = 'localhost'
-if not DEBUG:
-    host = os.getenv('DATABASE_HOST')
-    
-
-print("Host: ", host)
 
 DATABASES = {
     "default": {
@@ -118,8 +111,13 @@ DATABASES = {
         "NAME": os.getenv('DATABASE_NAME'),
         "USER": os.getenv('DATABASE_USER'),
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        "HOST": host,
+        "HOST": os.getenv('DATABASE_HOST', 'localhost'),  # Will use TCP/IP if host is IP/domain
         "PORT": os.getenv('DATABASE_PORT'),
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            # For Render.com, force TCP connection even if localhost
+            'unix_socket': None if not DEBUG else '/run/mysqld/mysqld.sock'
+        }
     }
 }
 
