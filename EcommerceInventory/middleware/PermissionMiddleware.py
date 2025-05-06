@@ -51,7 +51,7 @@ class PermissionMiddleware:
 
 def is_public_endpoint(url):
     # Add logic to identify public endpoints (like login, health checks, etc.)
-    public_urls = ['/api/auth/login/', '/health/', '/','']  # Add your public URLs here
+    public_urls = ['/api/auth/login/', '/health/', '/','/auth/','']  # Add your public URLs here
     return url in public_urls
 
 def urlToSkip():
