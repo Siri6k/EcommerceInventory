@@ -113,7 +113,7 @@ DATABASES = {
         "NAME": os.getenv('DATABASE_NAME'),  # Default database name
         "USER": os.getenv('DATABASE_USER'),         # Default user
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),     # Default empty password
-        "HOST": host,   
+        "HOST": host,  
         "PORT": os.getenv('DATABASE_PORT'),         # Default port
     }
 }
