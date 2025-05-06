@@ -68,7 +68,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     # Your other middlewares...
-    #"EcommerceInventory.middleware.PermissionMiddleware.PermissionMiddleware",
+    "EcommerceInventory.middleware.PermissionMiddleware.PermissionMiddleware",
 
 ]
 
