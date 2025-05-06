@@ -103,9 +103,9 @@ WSGI_APPLICATION = "EcommerceInventory.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-host = 'localhost'
-if not DEBUG:
-    host = os.getenv('DATABASE_HOST')
+host = os.getenv('DATABASE_HOST')
+if DEBUG:
+    host = 'localhost'
 
 DATABASES = {
     "default": {
