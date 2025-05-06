@@ -54,6 +54,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     
     "django.middleware.security.SecurityMiddleware",
+    #Whitenoise for serving static files in production
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    #########
     "django.contrib.sessions.middleware.SessionMiddleware",
      # Your other middlewares...
     "corsheaders.middleware.CorsMiddleware",  
@@ -164,6 +167,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
     ]
 
+# Enable compression and caching for Whitenoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
