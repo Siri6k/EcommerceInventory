@@ -78,8 +78,8 @@ REST_FRAMEWORK = {
 # Allow requests from your frontend (localhost:3000 in this case)
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
-    "https://niplan-market.onrender.com/",
-    "http://ec2-13-233-173-206.ap-south-1.compute.amazonaws.com/"
+    "https://niplan-market.onrender.com",
+    "http://ec2-13-233-173-206.ap-south-1.compute.amazonaws.com"
 ]
 
 ROOT_URLCONF = "EcommerceInventory.urls"
