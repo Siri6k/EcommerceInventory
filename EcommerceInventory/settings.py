@@ -110,15 +110,11 @@ if DEBUG:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv('DATABASE_NAME', 'ecommerce'),  # Default database name
-        "USER": os.getenv('DATABASE_USER', 'ecommerce'),         # Default user
-        "PASSWORD": os.getenv('DATABASE_PASSWORD', ''),     # Default empty password
+        "NAME": os.getenv('DATABASE_NAME'),  # Default database name
+        "USER": os.getenv('DATABASE_USER'),         # Default user
+        "PASSWORD": os.getenv('DATABASE_PASSWORD'),     # Default empty password
         "HOST": host,   
-        "PORT": os.getenv('DATABASE_PORT', '3306'),         # Default port
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'unix_socket': None if not DEBUG else '/run/mysqld/mysqld.sock'
-        }
+        "PORT": os.getenv('DATABASE_PORT'),         # Default port
     }
 }
 
