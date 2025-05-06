@@ -113,7 +113,11 @@ DATABASES = {
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),
         "HOST": os.getenv('DATABASE_HOST'), 
         "PORT": os.getenv('DATABASE_PORT'),
-        
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            # For Render.com, force TCP connection even if localhost
+            'unix_socket': None if not DEBUG else '/run/mysqld/mysqld.sock'
+        }
     }
 }
 
