@@ -16,6 +16,7 @@ class PermissionMiddleware:
         db_public_urls = list(ModuleUrls.objects.filter(module__isnull=True).values_list('url', flat=True))
         hardcoded_public_urls = [
             '/api/auth/login/',
+            '/api/auth/signup/',
             '/health/',
             '/',
             '/auth/',
