@@ -21,8 +21,7 @@ class PermissionMiddleware:
             '/auth/',
             '/api/auth/refresh/',
             '/api/docs/',
-            '',
-            re.compile(r'^/api/auth/userpermission/[^/]+/?$'),  # Pattern pour les IDs
+            ''
         ]
         return set(db_public_urls + hardcoded_public_urls)
     

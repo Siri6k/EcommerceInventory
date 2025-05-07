@@ -116,7 +116,7 @@ class UserPermissionView(APIView):
                 UserServices_userpermissions.user_id=%s;
                 '''
         
-        permissions = executeQuery(query,[pk])
+        permissions = executeQuery(query, [pk])
 
         permissionList = {}
         for permission in permissions:
