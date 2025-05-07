@@ -101,19 +101,19 @@ class UserPermissionView(APIView):
     def get(self, request, pk):
         query = '''
                 SELECT 
-                    userservices_modules.module_name,
-                    userservices_modules.id AS module_id,
-                    userservices_modules.parent_id_id,
-                    COALESCE(userservices_userpermissions.is_permission,0) as is_permission,
-                    userservices_userpermissions.user_id,
-                    userservices_userpermissions.domain_user_id_id 
-                    FROM 
-                        `userservices_modules` 
-                    LEFT JOIN 
-                        userservices_userpermissions 
-                    on 
-                        userservices_userpermissions.module_id=userservices_modules.id AND
-                userservices_userpermissions.user_id=%s;
+                    UserServices_modules.module_name, 
+                    UserServices_modules.id as module_id, 
+                    UserServices_modules.parent_id_id, 
+                    COALESCE(UserServices_userpermissions.is_permission,0) as is_permission,
+                    UserServices_userpermissions.user_id, 
+                    UserServices_userpermissions.domain_user_id_id 
+                    FROM
+                        `UserServices_modules` 
+                        left join 
+                            UserServices_userpermissions
+                        on 
+                        UserServices_userpermissions.module_id=UserServices_modules.id and 
+                UserServices_userpermissions.user_id=%s;
                 '''
         
         permissions = executeQuery(query,[pk])

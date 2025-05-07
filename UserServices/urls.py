@@ -13,7 +13,4 @@ urlpatterns = [
     path("updateUser/<pk>/", UserController.UpdateUsers.as_view(), name="user_update"),
     path("userpermission/<pk>/", UserController.UserPermissionView.as_view(), name="user_permission"),
 
-
-
-
 ]
