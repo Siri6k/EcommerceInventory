@@ -101,18 +101,18 @@ class UserPermissionView(APIView):
     def get(self, request, pk):
         query = '''
                 SELECT 
-                    UserServices_modules.module_name, 
-                    UserServices_modules.id as module_id, 
-                    UserServices_modules.parent_id_id, 
+                    UserServices_modules.module_name,
+                    UserServices_modules.id AS module_id,
+                    UserServices_modules.parent_id_id,
                     COALESCE(UserServices_userpermissions.is_permission,0) as is_permission,
-                    UserServices_userpermissions.user_id, 
+                    UserServices_userpermissions.user_id,
                     UserServices_userpermissions.domain_user_id_id 
-                    FROM
+                    FROM 
                         `UserServices_modules` 
-                        left join 
-                            UserServices_userpermissions
-                        on 
-                        UserServices_userpermissions.module_id=UserServices_modules.id and 
+                    LEFT JOIN 
+                        UserServices_userpermissions 
+                    on 
+                        UserServices_userpermissions.module_id=UserServices_modules.id AND
                 UserServices_userpermissions.user_id=%s;
                 '''
         
