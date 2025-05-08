@@ -21,7 +21,7 @@ class ModuleView(generics.CreateAPIView):
     def get(self, request):
         permission_module_ids=[]
         #return all modules for super Admin and Top Domain level User
-        if request.user.role == 'Super Admin' or request.user.domain_user_id.id==request.user.id:
+        if request.user.role == 'Super Admin' or (request.user.domain_user_id and request.user.domain_user_id.id==request.user.id):
             menus = Modules.objects.filter(
                 is_menu=True, parent_id=None
                 ).order_by('display_order')
@@ -42,7 +42,7 @@ class ModuleView(generics.CreateAPIView):
         cleaned_menus= []
         for menu in serialized_menus:
             menu["fields"]["id"] = menu["pk"]
-            if request.user.role == 'Super Admin' or request.user.domain_user_id.id==request.user.id:
+            if request.user.role == 'Super Admin' or (request.user.domain_user_id and request.user.domain_user_id.id==request.user.id):
                 menu["fields"] ["submenus"]= Modules.objects.filter(
                     parent_id=menu["pk"], is_menu=True, is_active=True
                     ).order_by('display_order').values(

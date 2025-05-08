@@ -193,8 +193,8 @@ class Users(AbstractUser):
         return "username"
 
     def save(self, *args, **kwargs):
-        if not self.domain_user_id and self.id:
-            self.domain_user_id = Users.objects.get(id=self.id)
+        if not self.added_by_user_id and self.id:
+            self.added_by_user_id = Users.objects.get(id=self.id)
         if (
             not self.pk or 
             Users.objects.filter(pk=self.pk)
