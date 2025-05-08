@@ -5,11 +5,29 @@ from django.contrib.auth.hashers import make_password
 
 # Create your models here.
 class Users(AbstractUser):
+    username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
+    profile_pic = models.JSONField()
+    password = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField()
-    city = models.CharField(max_length=50, blank=True, null=True)
-    state = models.CharField(max_length=50, blank=True, null=True)
+    account_status = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        default="Active",
+        choices=(
+            ("Active", "Active"),
+            ("Inactive", "Inactive"),
+            ("Blocked", "Blocked"),
+        ),
+    )
+    city = models.CharField(max_length=50, 
+                            blank=True, 
+                            null=True,
+                            default="Kinshasa"
+                            )
+    state = models.CharField(max_length=50, blank=True, null=True,  default="Kinshasa")
     country = models.CharField(
         max_length=50,
         blank=True,
@@ -21,18 +39,6 @@ class Users(AbstractUser):
             ("Angola", "Angola"),
             ("Zambia", "Zambia"),
             ("Burundi", "Burundi"),
-        ),
-    )
-    profile_pic = models.JSONField()
-    account_status = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        default="Active",
-        choices=(
-            ("Active", "Active"),
-            ("Inactive", "Inactive"),
-            ("Blocked", "Blocked"),
         ),
     )
     role = models.CharField(
@@ -49,15 +55,13 @@ class Users(AbstractUser):
         ),
     )
     dob = models.DateField(blank=True, null=True)
-    username = models.CharField(max_length=50, unique=True)
-    password = models.CharField(max_length=255)
     social_media_links = models.JSONField(blank=True, null=True)
     addition_details = models.JSONField(blank=True, null=True)
     language = models.CharField(
         max_length=50,
         blank=True,
         null=True,
-        default="English",
+        default="French",
         choices=(
             ("English", "English"),
             ("French", "French"),
@@ -97,7 +101,7 @@ class Users(AbstractUser):
         max_length=50,
         blank=True,
         null=True,
-        default="UTC+02:00",
+        default="UTC+01:00",
         choices=(
             ("UTC-12:00", "UTC-12:00"),
             ("UTC-11:00", "UTC-11:00"),

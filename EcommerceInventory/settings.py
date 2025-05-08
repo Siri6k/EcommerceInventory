@@ -110,7 +110,7 @@ WSGI_APPLICATION = "EcommerceInventory.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 host = os.getenv('DATABASE_HOST')
 if DEBUG:
-    host = 'localhost'
+   host = 'localhost'
 
 DATABASES = {
     "default": {
@@ -120,6 +120,11 @@ DATABASES = {
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),     # Default empty password
         "HOST": host,  
         "PORT": os.getenv('DATABASE_PORT'),         # Default port
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            # For MySQL 5.7+ you might want:
+            # 'init_command': "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'",
+        },
     }
 }
 

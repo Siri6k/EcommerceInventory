@@ -16,6 +16,11 @@ class SignupAPIView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
         profile_pic = request.data.get("profile_pic")
+        address = request.data.get("address")
+
+        if not address:
+            #Default address on signup
+            address = "Kinshasa Gombe" 
 
         emailcheck = Users.objects.filter(email=email)
         if emailcheck.exists():
@@ -27,9 +32,17 @@ class SignupAPIView(APIView):
 
         if username is None or password is None or email is None:
             return renderResponse(data="Please provide both username and password", message="Please provide both username and password", status=status.HTTP_400_BAD_REQUEST)
+        
+         if not profile_pic:
+            # Using DiceBear for a generated avatar
+            profile_pic = [f"https://api.dicebear.com/7.x/initials/svg?seed={username}"]
 
         user = Users.objects.create_user(
-            username=username, email=email, password=password, profile_pic=profile_pic
+            username=username,
+            email=email,
+            password=password,
+            profile_pic=profile_pic,
+            address=address
         )
         if request.data.get("domain_user_id"):
             user.domain_user_id = Users.objects.get(
