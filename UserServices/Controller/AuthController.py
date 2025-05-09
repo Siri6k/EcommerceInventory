@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate
 from UserServices.models import Modules, UserPermissions, Users
 from EcommerceInventory.Helpers import renderResponse
 from EcommerceInventory.permission import IsSuperAdmin
+from django.contrib.auth.hashers import make_password
 
 
 class SignupAPIView(APIView):
@@ -16,11 +17,7 @@ class SignupAPIView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
         profile_pic = request.data.get("profile_pic")
-        address = request.data.get("address")
-
-        if not address:
-            #Default address on signup
-            address = "Kinshasa Gombe" 
+        
 
         emailcheck = Users.objects.filter(email=email)
         if emailcheck.exists():
@@ -33,25 +30,32 @@ class SignupAPIView(APIView):
         if username is None or password is None or email is None:
             return renderResponse(data="Please provide both username and password", message="Please provide both username and password", status=status.HTTP_400_BAD_REQUEST)
         
-        if not profile_pic:
-            # Using DiceBear for a generated avatar
-            profile_pic = [f"https://api.dicebear.com/7.x/initials/svg?seed={username}"]
+        
 
         user = Users.objects.create_user(
             username=username,
             email=email,
             password=password,
-            profile_pic=profile_pic,
-            address=address
+            profile_pic=profile_pic
         )
         if request.data.get("domain_user_id"):
             user.domain_user_id = Users.objects.get(
                 id=request.data.get("domain_user_id"))
         user.save()
-        #Save default permissions (dashboard, analytics and settings)
+
+       
+
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        access["username"] = user.username
+        access["email"] = user.email
+        access["profile_pic"] = user.profile_pic if user.profile_pic else ""
+        access["role"] = user.role
+
+
+         #Save default permissions (dashboard, analytics and settings)
         default_modules = [45,46,18]
-        user = Users.objects.get(username=username)
-        user_id = user.id
+        user_id = Users.objects.filter(email=email).values("id")
 
         for module_id in default_modules:
             module= Modules.objects.get(id=module_id)
@@ -61,13 +65,6 @@ class SignupAPIView(APIView):
                     is_permission=1
                 )
             permission.save()
-
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
-        access["username"] = user.username
-        access["email"] = user.email
-        access["profile_pic"] = user.profile_pic if user.profile_pic else ""
-        access["role"] = user.role
 
         return Response(
             {
@@ -86,8 +83,11 @@ class LoginAPIView(APIView):
 
         if username is None or password is None:
             return renderResponse(data="Please provide both username and password", message="Please provide both username and password", status=status.HTTP_400_BAD_REQUEST)
+        
+        print(password)
+        print(make_password(password))
 
-        user = authenticate(username=username, password=password)
+        user = authenticate(request, username=username, password=password)
         if user:
             refresh = RefreshToken.for_user(user)
             access = refresh.access_token
