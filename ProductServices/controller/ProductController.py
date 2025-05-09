@@ -1,10 +1,7 @@
-import re
-from unicodedata import category
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from django.db.models import Q
-from django.db import models
+
 
 from UserServices.models import Users
 from EcommerceInventory.Helpers import (
@@ -57,7 +54,20 @@ class ProductSerializer(serializers.ModelSerializer):
     
     def get_added_by_user_id(self, obj):
         return "#"+str(obj.added_by_user_id.id)+" "+obj.added_by_user_id.username
+
+class ProductAllSerializer(serializers.ModelSerializer):
    
+    class Meta:
+        model = Products
+        fields = ["id", "name", 
+                  "category_id", "image", 
+                  "description","sku",
+                  "initial_buying_price",
+                  "initial_selling_price",
+                  "created_at",
+                  "updated_at"]
+
+
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     authentication_classes = [JWTAuthentication]
@@ -72,6 +82,19 @@ class ProductListView(generics.ListAPIView):
     
      #using the mixin to add search and ordering functionality
     @CommonListAPIMixin.common_list_decorator(ProductSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+class ProductAllListView(generics.ListAPIView):
+    serializer_class = ProductAllSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        queryset = Products.objects.all()
+        return queryset
+    
+     #using the mixin to add search and ordering functionality
+    @CommonListAPIMixin.common_list_decorator(ProductAllSerializer)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
  

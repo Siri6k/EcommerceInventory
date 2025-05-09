@@ -22,7 +22,8 @@ class PermissionMiddleware:
             '/auth/',
             '/api/auth/refresh/',
             '/api/docs/',
-            ''
+            '',
+            '/api/products/all/'
         ]
         return set(db_public_urls + hardcoded_public_urls)
     
