@@ -193,8 +193,9 @@ class Users(AbstractUser):
         return "username"
 
     def save(self, *args, **kwargs):
-        if not self.added_by_user_id and self.id:
+        if not (self.added_by_user_id or self.domain_user_id)  and self.id:
             self.added_by_user_id = Users.objects.get(id=self.id)
+            self.domain_user_id = Users.objects.get(role="Super Admin")
         super().save(*args, **kwargs)
 
 

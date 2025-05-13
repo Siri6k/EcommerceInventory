@@ -61,7 +61,11 @@ class PermissionMiddleware:
     
     def _is_super_user(self, user):
         """Check if user has super admin privileges"""
-        return user.role == "Super Admin" or (hasattr(user, 'domain_user_id') and user.domain_user_id.id == user.id)
+       
+        return user.role == "Super Admin" or (
+            hasattr(user, 'domain_user_id') 
+            and user.domain_user_id is not None 
+            and user.domain_user_id.id == user.id)
     
     def is_public_endpoint(self, url):
         """Improved public endpoint detection"""

@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from EcommerceInventory.permission import IsSuperAdmin
 from EcommerceInventory.Helpers import CommonListAPIMixinWithFilter, executeQuery, renderResponse
 from UserServices.models import Modules, UserPermissions, Users
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -81,7 +82,7 @@ class UserWithFiltersListView(generics.ListAPIView):
 class UpdateUsers(generics.UpdateAPIView):
     serializer_class = UserSerializerWithFilters
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     def get_queryset(self):
         return Users.objects.filter(

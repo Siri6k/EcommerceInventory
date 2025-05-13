@@ -25,5 +25,6 @@ urlpatterns = [
     path("productQuestions/<str:product_id>/", ProductQuestionsListView.as_view(), name="product-question-list"),
     path("createProductQuestion/<str:product_id>/", CreateProductQuestionView.as_view(), name="create-product-question"),
     path("updateProductQuestion/<str:product_id>/<pk>/", UpdateProductQuestionView.as_view(), name="update-product-question"),
+    
       
 ]

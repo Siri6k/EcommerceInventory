@@ -1,4 +1,5 @@
 from django.urls import path
+from UserServices.Controller import ProfileController
 from UserServices.Controller import AuthController, UserController
 
 
@@ -12,5 +13,6 @@ urlpatterns = [
     path("userList/", UserController.UserWithFiltersListView.as_view(), name="user_list_filter"),
     path("updateUser/<pk>/", UserController.UpdateUsers.as_view(), name="user_update"),
     path("userpermission/<pk>/", UserController.UserPermissionView.as_view(), name="user_permission"),
-
+    path("getMyProfile/", ProfileController.UserProfileView.as_view(), name="user_profile"),
+    path("updateMyProfile/", ProfileController.UpdateUserFormController.as_view(), name="update_user_profile"),
 ]
