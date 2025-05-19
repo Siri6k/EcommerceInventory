@@ -5,6 +5,8 @@ from django.contrib.auth.hashers import make_password
 
 # Create your models here.
 class Users(AbstractUser):
+    first_name=None
+    last_name=None
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
     profile_pic = models.JSONField()
