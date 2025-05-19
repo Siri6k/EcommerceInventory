@@ -8,11 +8,12 @@ class Users(AbstractUser):
     first_name=None
     last_name=None
     dob=None
+    phone=None
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
     profile_pic = models.JSONField()
     password = models.CharField(max_length=255)
-    phone = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField()
     account_status = models.CharField(
@@ -31,7 +32,8 @@ class Users(AbstractUser):
                             null=True,
                             default="Kinshasa"
                             )
-    state = models.CharField(max_length=50, blank=True, null=True,  default="Kinshasa")
+    state=None
+    province = models.CharField(max_length=50, blank=True, null=True,  default="Kinshasa")
     country = models.CharField(
         max_length=50,
         blank=True,

@@ -28,11 +28,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
         fields = [
-            'username', 'email', 'phone', 'address', 'account_status',
+            'username', 'email', 'phone_number', 'whatsapp_number',
+              'address', 'account_status',
             'profile_pic',
-            'city', 'state', 'country', 'role', 'dob', 'language',
-            'departMent', 'designation', 'time_zone', 'currency',
-            'domain_name', 'plan_type'
+            'city', 'province', 'country', 'role', 'birthdate', 'language',
+             'time_zone', 'currency',
+             'plan_type', "social_media_links", "addition_details",
         ]
 
 class UserProfileView(APIView):
@@ -79,6 +80,9 @@ class UpdateUserFormController(APIView):
         field_info = model_class._meta.fields
         model_fields = [field.name for field in field_info]
         exclude_fields = getExcludeFields()
+        
+
+
 
         required_fields = [
             field.name
@@ -225,7 +229,8 @@ class UpdateUserFormController(APIView):
             model_instance = model_class()
 
         fields = getDynamicFormFields(
-            model_instance, request.user.domain_user_id)
+            model_instance, request.user.domain_user_id,
+            skip_fields=["account_status", "role", "plan_type"])
         
         return renderResponse(
             data=fields, 

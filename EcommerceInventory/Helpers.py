@@ -56,7 +56,6 @@ def getExcludeFields():
         "created_by_user_id",
         "updated_by_user_id",
         "domain_name",
-        "plan_type",
         "last_login",
         "last_device",
         "last_ip",
