@@ -7,11 +7,13 @@ from django.contrib.auth.hashers import make_password
 class Users(AbstractUser):
     first_name=None
     last_name=None
+    dob=None
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(unique=True)
     profile_pic = models.JSONField()
     password = models.CharField(max_length=255)
     phone = models.CharField(max_length=15, blank=True, null=True)
+    whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField()
     account_status = models.CharField(
         max_length=50,
@@ -47,7 +49,7 @@ class Users(AbstractUser):
         max_length=50,
         blank=True,
         null=True,
-        default="Admin",
+        default="Customer",
         choices=(
             ("Admin", "Admin"),
             ("Supplier", "Supplier"),
@@ -56,7 +58,8 @@ class Users(AbstractUser):
            
         ),
     )
-    dob = models.DateField(blank=True, null=True)
+    
+    birthdate = models.DateField(blank=True, null=True)
     social_media_links = models.JSONField(blank=True, null=True)
     addition_details = models.JSONField(blank=True, null=True)
     language = models.CharField(
@@ -69,36 +72,8 @@ class Users(AbstractUser):
             ("French", "French"),
         ),
     )
-    departMent = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        choices=(
-            ("IT", "IT"),
-            ("Finance", "Finance"),
-            ("Sales", "Sales"),
-            ("Marketing", "Marketing"),
-            ("Production", "Production"),
-            ("Maintenance", "Maintenance"),
-            ("Engineering", "Engineering"),
-            ("Consulting", "Consulting"),
-            ("Management", "Management"),
-            ("Others", "Others"),
-        ),
-    )
-    designation = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        choices=(
-            ("CEO", "CEO"),
-            ("CFO", "CFO"),
-            ("CTO", "CTO"),
-            ("CMO", "CMO"),
-            ("COO", "COO"),
-            ("Other", "Other"),
-        ),
-    )
+    departMent = None
+    designation = None
     time_zone = models.CharField(
         max_length=50,
         blank=True,
@@ -146,7 +121,7 @@ class Users(AbstractUser):
         ),
     )
     last_login = models.DateTimeField(blank=True, null=True)
-    last_device = models.CharField(max_length=50, blank=True, null=True)
+    last_device = models.CharField(blank=True, null=True, max_length=255)
     last_ip = models.GenericIPAddressField(blank=True, null=True)
     currency = models.CharField(
         max_length=50,
@@ -168,11 +143,7 @@ class Users(AbstractUser):
         related_name='domain_user_id_user'
     )
 
-    domain_name = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-    )
+    domain_name = None
     plan_type = models.CharField(
         max_length=50,
         blank=True,
@@ -198,6 +169,10 @@ class Users(AbstractUser):
         if not (self.added_by_user_id or self.domain_user_id)  and self.id:
             self.added_by_user_id = Users.objects.get(id=self.id)
             self.domain_user_id = Users.objects.get(role="Super Admin")
+        if self.phone and not self.whatsapp_number:
+            self.whatsapp_number = self.phone
+        if not self.phone and self.whatsapp_number:
+            self.phone = self.whatsapp_number
         super().save(*args, **kwargs)
 
 
@@ -279,9 +254,9 @@ class ActivityLog(models.Model):
     )
     activity = models.TextField()
     activity_type = models.CharField(max_length=50, blank=True)
-    activity_date = models.DateTimeField(auto_now_add=True)
+    #activity_date = models.DateTimeField(auto_now_add=True)
     activity_ip = models.GenericIPAddressField()
-    activity_device = models.CharField(max_length=50)
+    activity_device = models.CharField(blank=True, null=True, max_length=255)
     domain_user_id = models.ForeignKey(
         Users,
         on_delete=models.CASCADE,
@@ -291,3 +266,16 @@ class ActivityLog(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"[{self.activity_type}] - {self.user} - {self.activity}"
+
+# all visitors 
+class Visit(models.Model):
+    ip_address = models.CharField(max_length=45)  # IPv6 support
+    cookies = models.JSONField()  # Stockage JSON des cookies
+    user_agent = models.TextField()
+    visit_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"IP: {self.ip_address} - Date: {self.visit_date}"

@@ -84,8 +84,7 @@ class LoginAPIView(APIView):
         if username is None or password is None:
             return renderResponse(data="Please provide both username and password", message="Please provide both username and password", status=status.HTTP_400_BAD_REQUEST)
         
-        print(password)
-        print(make_password(password))
+       
 
         user = authenticate(request, username=username, password=password)
         if user:

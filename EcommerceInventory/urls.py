@@ -13,7 +13,7 @@ from UserServices.Controller.DynamicFormController import DynamicFormController
 from EcommerceInventory import settings
 from django.conf.urls.static import static
 
-from EcommerceInventory.views import FileUploadViewInS3, index
+from EcommerceInventory.views import FileUploadViewInS3, index, save_visit
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -52,6 +52,11 @@ urlpatterns = [
         "api/uploads/",
         FileUploadViewInS3.as_view(),
         name="fileupload",
+    ),
+    path(
+        "api/save-visit/",
+        save_visit,
+        name="save-visit",
     ),
 ]
 
