@@ -35,21 +35,33 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "UserServices",
-    "ProductServices",
-    "InventoryServices",
-    "OrderServices",
-    "rest_framework",
-    "rest_framework_simplejwt",
-    "corsheaders",
+    "django.contrib.staticfiles"
 ]
+
+THIRD_PARTY = [
+   'cloudinary', # For image upload
+   'cloudinary_storage', # For image upload
+   "rest_framework",
+   "rest_framework_simplejwt",
+   "corsheaders"
+]
+
+LOCALS_APPS = [
+   "UserServices",
+   "ProductServices",
+   "InventoryServices",
+   "OrderServices"
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY + LOCALS_APPS
+
+# Middleware
 
 MIDDLEWARE = [
     
@@ -176,6 +188,7 @@ STATICFILES_DIRS = [
 # Enable compression and caching for Whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Media files
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -202,7 +215,17 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),  # 1 day
 }
 
+# AWS S3 settings
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_ACCESS_KEY_SECRET = os.getenv('AWS_ACCESS_KEY_SECRET')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+
+# Cloudinary settings
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),    
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

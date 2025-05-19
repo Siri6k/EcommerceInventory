@@ -8,6 +8,7 @@ from EcommerceInventory.settings import (
     AWS_ACCESS_KEY_SECRET, 
     AWS_S3_REGION_NAME,
     AWS_STORAGE_BUCKET_NAME,
+    CLOUDINARY_STORAGE
 )
 import os
 
@@ -19,6 +20,11 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 
 from django.core.cache import cache
+
+
+import cloudinary.uploader
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
 
 
 def index(request):
@@ -59,6 +65,44 @@ class FileUploadViewInS3(APIView):
         },
             status = 200)
     
+
+
+
+class FileUploadViewInCloudinary(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, *args, **kwargs):
+        uploaded_files_urls = []
+
+        # Assurez-vous que Cloudinary est configuré dans vos paramètres
+        cloudinary.config(
+            cloud_name=CLOUDINARY_STORAGE['CLOUD_NAME'],
+            api_key=CLOUDINARY_STORAGE['API_KEY'],
+            api_secret=CLOUDINARY_STORAGE['API_SECRET'],
+            secure=True  # Utiliser HTTPS
+        )
+        # Traitez chaque fichier téléchargé
+        for file_key in request.FILES:
+            file_obj = request.FILES[file_key]
+
+            
+
+            # Upload direct sur Cloudinary
+            result = cloudinary.uploader.upload(
+                file_obj,
+                folder="uploads/",
+                resource_type="auto"  # auto détecte si c'est image, vidéo, etc.
+            )
+
+            # URL optimisée avec transformation (compression automatique + WebP)
+            optimized_url = result.get("secure_url")
+            uploaded_files_urls.append(optimized_url)
+
+        return Response({
+            'message': 'File uploaded successfully',
+            'urls': uploaded_files_urls
+        }, status=200)
+
 
 
 
