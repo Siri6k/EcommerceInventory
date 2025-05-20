@@ -3,6 +3,8 @@ from rest_framework import  serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from dateutil.parser import parse as parse_date
+from django.core.exceptions import ValidationError
 
 from EcommerceInventory.Helpers import (
     CommonListAPIMixin,
@@ -141,13 +143,26 @@ class UpdateUserFormController(APIView):
             elif field.is_relation and field.name in fieldsdata:
                 fieldsdata.pop(field.name)
 
+       # Nettoyage des champs spéciaux (date, datetime, etc.)
         for field in field_info:
-              if field.name in fieldsdata:
-                # Convertir les chaînes vides pour les dates
-                if isinstance(
-                    field, (models.DateField, models.DateTimeField)
-                ) and fieldsdata[field.name] == "":
-                    fieldsdata[field.name] = None
+            if field.name in fieldsdata:
+                value = fieldsdata[field.name]
+
+                # Convertir chaînes vides en None pour champs date
+                if isinstance(field, (models.DateField, models.DateTimeField)):
+                    if value == "":
+                        fieldsdata[field.name] = None
+                    elif isinstance(value, str):
+                        try:
+                            # Essayons de parser la date
+                            parsed_value = parse_date(value)
+                            fieldsdata[field.name] = parsed_value
+                        except Exception:
+                            return renderResponse(
+                                data=f"Invalid date format for field: {field.name}",
+                                message="Validation Error",
+                                status=400
+                            )
 
 
           
@@ -171,9 +186,17 @@ class UpdateUserFormController(APIView):
                     status=404
                 )
             model_instance = model_instance.first()
+            # Assurer que le mot de passe est haché correctement
+            if "password" in fieldsdata:
+                model_instance.set_password(fieldsdata["password"])
+                del fieldsdata["password"]
+
+            # Attribuer les autres champs
             for key, value in fieldsdata.items():
                 setattr(model_instance, key, value)
+
             model_instance.save()
+
         else:
             model_instance = model_class.objects.create(**fieldsdata)
 
