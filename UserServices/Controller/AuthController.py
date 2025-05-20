@@ -8,8 +8,7 @@ from django.contrib.auth import authenticate
 from UserServices.models import Modules, UserPermissions, Users
 from EcommerceInventory.Helpers import renderResponse
 from EcommerceInventory.permission import IsSuperAdmin
-from django.contrib.auth.hashers import make_password
-
+from django.utils import timezone
 
 class SignupAPIView(APIView):
     def post(self, request):
@@ -41,10 +40,22 @@ class SignupAPIView(APIView):
         if request.data.get("domain_user_id"):
             user.domain_user_id = Users.objects.get(
                 id=request.data.get("domain_user_id"))
+            
+        ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+        if ip_address:
+            ip_address = ip_address.split(',')[0]
+        else:
+            ip_address = request.META.get('REMOTE_ADDR')
+
+        # Récupération de l'appareil (User-Agent)
+        user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown Device')
+            # Mise à jour des informations dans le modèle User
+
+        user.last_login = timezone.now()
+        user.last_ip = ip_address
+        user.last_device = user_agent
         user.save()
-
-       
-
+      
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         access["username"] = user.username
@@ -94,6 +105,21 @@ class LoginAPIView(APIView):
             access["email"] = user.email
             access["profile_pic"] = user.profile_pic if user.profile_pic else ""
             access["role"] = user.role
+
+            ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+            if ip_address:
+                ip_address = ip_address.split(',')[0]
+            else:
+                ip_address = request.META.get('REMOTE_ADDR')
+
+            # Récupération de l'appareil (User-Agent)
+            user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown Device')
+             # Mise à jour des informations dans le modèle User
+
+            user.last_login = timezone.now()
+            user.last_ip = ip_address
+            user.last_device = user_agent
+            user.save(update_fields=['last_login', 'last_ip', 'last_device'])
 
             return Response(
                 {

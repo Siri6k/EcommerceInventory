@@ -170,7 +170,7 @@ class Users(AbstractUser):
     def save(self, *args, **kwargs):
         if not (self.added_by_user_id or self.domain_user_id)  and self.id:
             self.added_by_user_id = Users.objects.get(id=self.id)
-            self.domain_user_id = Users.objects.get(role="Super Admin")
+            self.domain_user_id = Users.objects.filter(role="Super Admin").first()
         if self.phone and not self.whatsapp_number:
             self.whatsapp_number = self.phone
         if not self.phone and self.whatsapp_number:

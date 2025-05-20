@@ -5,6 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from dateutil.parser import parse as parse_date
 from django.core.exceptions import ValidationError
+from django.db.models import NOT_PROVIDED
 
 from EcommerceInventory.Helpers import (
     CommonListAPIMixin,
@@ -35,7 +36,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'profile_pic',
             'city', 'province', 'country', 'role', 'birthdate', 'language',
              'time_zone', 'currency',
-             'plan_type', "social_media_links", "addition_details",
+             'plan_type', "social_media_links", "addition_details", 
+             "last_login", "created_at",
         ]
 
 class UserProfileView(APIView):
@@ -90,7 +92,7 @@ class UpdateUserFormController(APIView):
             field.name
             for field in field_info
             if not field.null
-            and field.default is not None
+            and field.default == NOT_PROVIDED
             and field.name not in exclude_fields
         ]
 

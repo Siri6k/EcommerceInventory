@@ -28,11 +28,7 @@ class UpdateLastLoginMiddleware:
             # Récupération de l'appareil (User-Agent)
             user_agent = request.META.get('HTTP_USER_AGENT', 'Unknown Device')
 
-            # Mise à jour des informations dans le modèle User
-            request.user.last_login = timezone.now()
-            request.user.last_ip = ip_address
-            request.user.last_device = user_agent
-            request.user.save(update_fields=['last_login', 'last_ip', 'last_device'])
+           
 
             # Enregistrement de l'activité
             activity_type = "PAGE_VIEW"

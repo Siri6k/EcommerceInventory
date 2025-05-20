@@ -55,7 +55,7 @@ class DynamicFormController(APIView):
             field.name
             for field in field_info
             if not field.null
-            and field.default is not None
+            and field.default == models.NOT_PROVIDED
             and field.name not in exclude_fields
         ]
 
