@@ -25,6 +25,7 @@ class PermissionMiddleware:
             '',
             '/api/products/all/',
             '/api/save-visit/',
+            '/api/uploads/',
         ]
         return set(db_public_urls + hardcoded_public_urls)
     

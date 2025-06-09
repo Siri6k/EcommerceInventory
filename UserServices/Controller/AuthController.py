@@ -10,6 +10,13 @@ from EcommerceInventory.Helpers import renderResponse
 from EcommerceInventory.permission import IsSuperAdmin
 from django.utils import timezone
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
+
+
 class SignupAPIView(APIView):
     def post(self, request):
         username = request.data.get("username")
@@ -62,6 +69,8 @@ class SignupAPIView(APIView):
         access["email"] = user.email
         access["profile_pic"] = user.profile_pic if user.profile_pic else ""
         access["role"] = user.role
+        access["phone_number"] = user.phone_number if user.phone_number else ""
+        access["address"] = user.address if user.address else ""
 
 
          #Save default permissions (dashboard, analytics and settings)
@@ -105,6 +114,9 @@ class LoginAPIView(APIView):
             access["email"] = user.email
             access["profile_pic"] = user.profile_pic if user.profile_pic else ""
             access["role"] = user.role
+            access["phone_number"] = user.phone_number if user.phone_number else ""
+            access["address"] = user.address if user.address else ""
+
 
             ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
             if ip_address:
@@ -172,3 +184,56 @@ class SuperAdminCheckApi(APIView):
             message="This is a Super Admin API!",
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+# your_app/serializers.py
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        
+        token["username"] = user.username
+        token["email"] = user.email
+        token["profile_pic"] = user.profile_pic if user.profile_pic else ""
+        token["role"] = user.role
+        token["phone_number"] = user.phone_number if user.phone_number else ""
+        token["address"] = user.address if user.address else ""
+
+        return token
+
+# your_app/views.py
+
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+
+
+
+# your_app/serializers.py
+
+
+
+class MyTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # This will get the old refresh token from the request
+        refresh = RefreshToken(attrs["refresh"])
+
+        # If ROTATE_REFRESH_TOKENS = True, a new one will be created
+        new_refresh = str(refresh)
+
+        # Include both tokens in the response
+        data["refresh"] = new_refresh
+        return data
+
+# your_app/views.py
+
+
+class MyTokenRefreshView(TokenRefreshView):
+    serializer_class = MyTokenRefreshSerializer
