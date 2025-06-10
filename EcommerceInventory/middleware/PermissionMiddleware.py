@@ -24,6 +24,7 @@ class PermissionMiddleware:
             '/api/docs/',
             '',
             '/api/products/all/',
+            '/api/products/detail/<pk>/',
             '/api/save-visit/',
             '/api/uploads/',
         ]
@@ -89,7 +90,8 @@ class PermissionMiddleware:
                     return True
         
         # Special cases (could be moved to config)
-        public_path_segments = {'manage', 'form', 'create', 'home', 'static', 'media', "dashboard", "myprofile", "profile", "public"}
+        public_path_segments = {'manage', 'form', 'create', 'home', 'static', 'media', "dashboard", "myprofile", "profile", 
+                                "public", "detail", "list", "view", "search", "api", "auth", "login", "signup", "logout"}
         if any(segment in url.lower() for segment in public_path_segments):
             return True
             

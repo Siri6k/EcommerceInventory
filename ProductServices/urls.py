@@ -2,6 +2,7 @@ from django.urls import path
 
 from .controller.ProductController import (
     ProductAllListView,
+    ProductDetailView,
     ProductListView,
     ProductReviewListView,
     CreateProductReviewView,
@@ -17,6 +18,7 @@ urlpatterns = [
     path("categories/", CategoryListView.as_view(), name="category-list"),
     path("", ProductListView.as_view(), name="product-list"),
     path("all/", ProductAllListView.as_view(), name="all-product-list"),
+    path('detail/<pk>/', ProductDetailView.as_view(), name='product-detail'),
    ## Product Review API list, create, update
     path("productReviews/<str:product_id>/", ProductReviewListView.as_view(), name="product-review-list"),
     path("createProductReview/<str:product_id>/", CreateProductReviewView.as_view(), name="create-product-review"),

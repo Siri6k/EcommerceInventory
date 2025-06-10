@@ -85,18 +85,7 @@ class ProductListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
     
-class ProductAllListView(generics.ListAPIView):
-    serializer_class = ProductAllSerializer
-    pagination_class = CustomPageNumberPagination
 
-    def get_queryset(self):
-        queryset = Products.objects.all()
-        return queryset
-    
-     #using the mixin to add search and ordering functionality
-    @CommonListAPIMixin.common_list_decorator(ProductAllSerializer)
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
  
 ############### Review and questions API #######################
 
@@ -226,3 +215,59 @@ class UpdateProductQuestionView(generics.UpdateAPIView):
         else:
             serializer.save()
     
+
+
+class ProductAllListView(generics.ListAPIView):
+    serializer_class = ProductAllSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        queryset = Products.objects.all()
+        return queryset
+    
+     #using the mixin to add search and ordering functionality
+    @CommonListAPIMixin.common_list_decorator(ProductAllSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+
+
+class ProductDetailView(generics.RetrieveAPIView):
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        return Products.objects.filter(
+            id=self.kwargs["pk"]
+        )
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        product = serializer.data
+        # Fetching reviews and questions related to the product
+        reviews = ProductReviews.objects.filter(
+                        product_id=instance.id
+                    )
+        
+        if not reviews.exists():
+            reviews = []
+        else:
+            reviews = ProductReviewSerializer(reviews, many=True).data
+
+        questions = ProductQuestions.objects.filter(
+                        product_id=instance.id
+                    )
+        if not questions.exists():
+            questions = []
+        else:
+            questions = ProductQuestionSerializer(questions, many=True).data
+        
+        return renderResponse(
+            data={
+                "product": product,
+                "reviews": reviews,
+                "questions": questions
+            },
+            message="Product details retrieved successfully.",
+            status=200
+        )
