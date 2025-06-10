@@ -196,7 +196,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "UserServices.Users"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),  # 1 dayc
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),  # 1 dayc
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # 1 day
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
