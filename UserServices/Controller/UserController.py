@@ -96,7 +96,7 @@ class UpdateUsers(generics.UpdateAPIView):
 
 
 class UserPermissionView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSuperAdmin]
     authentication_classes = [JWTAuthentication]
 
     def get(self, request, pk):

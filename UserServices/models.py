@@ -5,11 +5,10 @@ from django.contrib.auth.hashers import make_password
 
 # Create your models here.
 class Users(AbstractUser):
-    first_name=None
-    last_name=None
-    dob=None
-    phone=None
+   
     username = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
     email = models.EmailField(unique=True)
     profile_pic = models.JSONField()
     password = models.CharField(max_length=255)
@@ -32,7 +31,6 @@ class Users(AbstractUser):
                             null=True,
                             default="Kinshasa"
                             )
-    state=None
     province = models.CharField(max_length=50, blank=True, null=True,  default="Kinshasa")
     country = models.CharField(
         max_length=50,
@@ -174,10 +172,10 @@ class Users(AbstractUser):
 
     def save(self, *args, **kwargs):
         # Synchroniser phone <-> whatsapp_number
-        if self.phone and not self.whatsapp_number:
-            self.whatsapp_number = self.phone
-        elif self.whatsapp_number and not self.phone:
-            self.phone = self.whatsapp_number
+        if self.phone_number and not self.whatsapp_number:
+            self.whatsapp_number = self.phone_number
+        elif self.whatsapp_number and not self.phone_number:
+            self.phone_number = self.whatsapp_number
 
         is_new = self.pk is None
         super().save(*args, **kwargs)  # Sauvegarde initiale pour générer l'ID

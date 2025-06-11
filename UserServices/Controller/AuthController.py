@@ -74,7 +74,7 @@ class SignupAPIView(APIView):
 
 
          #Save default permissions (dashboard, analytics and settings)
-        default_modules = [45,46,18]
+        default_modules = [45,46,18,19,28,27]
         user_id = Users.objects.filter(email=email).values("id")
 
         for module_id in default_modules:
