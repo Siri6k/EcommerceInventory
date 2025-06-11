@@ -53,20 +53,41 @@ class ProductSerializer(serializers.ModelSerializer):
         return "#"+str(obj.domain_user_id.id)+" "+obj.domain_user_id.username
     
     def get_added_by_user_id(self, obj):
-        return "#"+str(obj.added_by_user_id.id)+" "+obj.added_by_user_id.username
+        user = obj.added_by_user_id
+        if not user:
+            return None
+        
+        return {
+            "id": user.id,
+            "username": user.username,
+            "whatsapp_number": user.whatsapp_number
+        }
 
-class ProductAllSerializer(serializers.ModelSerializer):
-   
+class ProductListSerializer(serializers.ModelSerializer):
+    category_id= serializers.SerializerMethodField()
+    added_by_user_id= serializers.SerializerMethodField()
     class Meta:
         model = Products
         fields = ["id", "name", 
                   "category_id", "image", 
-                  "description","sku",
-                  "initial_buying_price",
-                  "initial_selling_price",
-                  "created_at",
+                  "description",
+                  "added_by_user_id",
+                  "price", "quantity",
                   "updated_at"]
-
+        
+    def get_category_id(self, obj):
+        return "#"+str(obj.category_id.id)+" "+obj.category_id.name
+        
+    def get_added_by_user_id(self, obj):
+        user = obj.added_by_user_id
+        if not user:
+            return None
+        
+        return {
+            "id": user.id,
+            "username": user.username,
+            "whatsapp_number": user.whatsapp_number
+        }
 
 class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
@@ -218,7 +239,7 @@ class UpdateProductQuestionView(generics.UpdateAPIView):
 
 
 class ProductAllListView(generics.ListAPIView):
-    serializer_class = ProductAllSerializer
+    serializer_class = ProductListSerializer
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
@@ -226,7 +247,7 @@ class ProductAllListView(generics.ListAPIView):
         return queryset
     
      #using the mixin to add search and ordering functionality
-    @CommonListAPIMixin.common_list_decorator(ProductAllSerializer)
+    @CommonListAPIMixin.common_list_decorator(ProductListSerializer)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
     

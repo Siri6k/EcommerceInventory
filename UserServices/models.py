@@ -14,7 +14,7 @@ class Users(AbstractUser):
     profile_pic = models.JSONField()
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    whatsapp_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
+    whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField()
     account_status = models.CharField(
         max_length=50,
@@ -173,14 +173,24 @@ class Users(AbstractUser):
         return "username"
 
     def save(self, *args, **kwargs):
-        if not (self.added_by_user_id or self.domain_user_id)  and self.id:
-            self.added_by_user_id = Users.objects.get(id=self.id)
-            self.domain_user_id = Users.objects.filter(role="Super Admin").first()
+        # Synchroniser phone <-> whatsapp_number
         if self.phone and not self.whatsapp_number:
             self.whatsapp_number = self.phone
-        if not self.phone and self.whatsapp_number:
+        elif self.whatsapp_number and not self.phone:
             self.phone = self.whatsapp_number
-        super().save(*args, **kwargs)
+
+        is_new = self.pk is None
+        super().save(*args, **kwargs)  # Sauvegarde initiale pour générer l'ID
+
+        # Après création : si les champs ne sont pas définis
+        if is_new and (not self.added_by_user_id or not self.domain_user_id):
+            self.added_by_user_id = self
+            
+            super_admin = Users.objects.filter(role="Super Admin").first()
+            self.domain_user_id = super_admin if super_admin else self
+
+            super().save(update_fields=["added_by_user_id", "domain_user_id"])
+
 
 
 class UserShippingAddress(models.Model):
