@@ -79,6 +79,19 @@ class ModuleView(generics.CreateAPIView):
                     "module_description":"Module Urls",
                     "submenus":[],
                  })
+        else:
+            cleaned_menus.append({
+                    'id':0,
+                    'module_name':"Contact Us",
+                    'module_icon':'phone',
+                    'is_menu': True,
+                    "is_active":True,
+                    'parent_id':None,
+                    "display_order":0,
+                    'module_url':"/contact",
+                    "module_description":"Contact Page for Niplan",
+                    "submenus":[],
+                 })
 
         return renderResponse(
             data=cleaned_menus, 

@@ -33,7 +33,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'username', 'email', 'phone_number', 'whatsapp_number',
               'address', 'account_status',
-            'profile_pic',
+            'profile_pic', 'id', 'first_name', 'last_name',
             'city', 'province', 'country', 'role', 'birthdate', 'language',
              'time_zone', 'currency',
              'plan_type', "social_media_links", "addition_details", 
