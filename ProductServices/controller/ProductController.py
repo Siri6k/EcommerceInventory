@@ -60,7 +60,10 @@ class ProductSerializer(serializers.ModelSerializer):
         return {
             "id": user.id,
             "username": user.username,
-            "whatsapp_number": user.whatsapp_number
+            "whatsapp_number": user.whatsapp_number,
+            "country": user.country,
+            "city": user.city
+
         }
 
 class ProductListSerializer(serializers.ModelSerializer):
@@ -86,7 +89,10 @@ class ProductListSerializer(serializers.ModelSerializer):
         return {
             "id": user.id,
             "username": user.username,
-            "whatsapp_number": user.whatsapp_number
+            "whatsapp_number": user.whatsapp_number,
+            "country": user.country,
+            "city": user.city
+
         }
 
 class ProductListView(generics.ListAPIView):
