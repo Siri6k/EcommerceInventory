@@ -14,7 +14,7 @@ class Users(AbstractUser):
     profile_pic = models.JSONField()
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
+    whatsapp_number = models.CharField(max_length=15, blank=True, null=True, unique=True)
     address = models.TextField()
     account_status = models.CharField(
         max_length=50,
@@ -45,6 +45,11 @@ class Users(AbstractUser):
             ("Angola", "Angola"),
             ("Zambia", "Zambia"),
             ("Burundi", "Burundi"),
+            ("Uganda", "Uganda"),
+            ("Zimbabwe", "Zimbabwe"),
+            ("Others", "Others"),
+            ("Congo-brazza", "Congo-brazza"),
+
         ),
     )
     role = models.CharField(

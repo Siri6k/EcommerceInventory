@@ -37,29 +37,17 @@ class Products(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
     image = models.JSONField()
+    price = models.FloatField()
+    sku = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.IntegerField(default=1)
     description = models.TextField()
-    specifications = models.JSONField()
-    html_description = models.TextField()
-    highlights = models.JSONField()
-    sku = models.CharField(max_length=255)
-    initial_buying_price = models.FloatField()
-    initial_selling_price = models.FloatField()
-    weight = models.FloatField()
-    dimensions = models.CharField(default="0x0x0", max_length=255)
-    uom = models.CharField(max_length=255)
-    color = models.CharField(max_length=255)
-    tax_percentage = models.FloatField()
-    brand = models.CharField(max_length=255)
-    brand_model = models.CharField(max_length=255)
+    sku = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(
         max_length=255,
         choices=[("ACTIVE", "ACTIVE"), ("INACTIVE", "INACTIVE")],
         default="ACTIVE",
-    )
-    seo_title = models.CharField(max_length=255)
-    seo_description = models.TextField()
-    seo_keywords = models.JSONField()
-    addition_details = models.JSONField()
+        )
+    additionnal_details = models.JSONField()
     category_id = models.ForeignKey(
         Categories,
         on_delete=models.CASCADE,
@@ -83,6 +71,15 @@ class Products(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # on sauvegarde pour obtenir l'ID
+        if not self.sku:
+            prefix = "SKU"
+            cat_part = (self.category_id.name[:5].upper() if self.category_id and self.category_id.name else "UNCAT")
+            name_part = (self.name[:5].upper() if self.name else "NONAM")
+            self.sku = f"{prefix}-{cat_part}-{name_part}-00{self.id}"
+            super().save(update_fields=["sku"])  # mise à jour uniquement du champ SKU
 
 
 class ProductQuestions(models.Model):
