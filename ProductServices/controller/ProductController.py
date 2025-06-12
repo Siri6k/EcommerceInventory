@@ -103,7 +103,7 @@ class ProductListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Products.objects.filter(
-            domain_user_id=self.request.user.domain_user_id.id
+            added_by_user_id=self.request.user.added_by_user_id.id
         )
         return queryset
     

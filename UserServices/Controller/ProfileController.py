@@ -16,6 +16,7 @@ from EcommerceInventory.Helpers import (
 )
 
 from rest_framework.views import APIView
+from rest_framework import generics
 
 
 from django.core.serializers import serialize
@@ -56,7 +57,26 @@ class UserProfileView(APIView):
         serializer = self.serializer_class(user)
         
         return renderResponse(message="My Profile Fetched", data=serializer.data, status=200) 
+
+class ProfileView(generics.RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+
+    def get_queryset(self):
+        return Users.objects.filter(
+            id=self.kwargs["pk"]
+        )
     
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        profile = serializer.data        
+        
+        return renderResponse(
+            data= profile,
+            message="Profile retrieved successfully.",
+            status=200
+        )
+
 
 class UpdateUserFormController(APIView):
     authentication_classes = [JWTAuthentication]
