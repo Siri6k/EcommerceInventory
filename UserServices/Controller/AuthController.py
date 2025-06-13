@@ -23,6 +23,15 @@ class SignupAPIView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
         profile_pic = request.data.get("profile_pic")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        phone_number = request.data.get("phone_number")
+        whatsapp_number = request.data.get("whatsapp_number")
+        address = request.data.get("address")
+        province = request.data.get("province")
+        city = request.data.get("city")
+
+
         
 
         emailcheck = Users.objects.filter(email=email)
@@ -42,8 +51,17 @@ class SignupAPIView(APIView):
             username=username,
             email=email,
             password=password,
-            profile_pic=profile_pic
+            profile_pic=profile_pic,
+            address=address,
+            phone_number=phone_number,
+            whatsapp_number=whatsapp_number,
+            address=address,
+            first_name=first_name,
+            last_name=last_name,
+            province=province,
+            city=city,
         )
+
         if request.data.get("domain_user_id"):
             user.domain_user_id = Users.objects.get(
                 id=request.data.get("domain_user_id"))
