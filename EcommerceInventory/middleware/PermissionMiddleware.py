@@ -91,7 +91,7 @@ class PermissionMiddleware:
         
         # Special cases (could be moved to config)
         public_path_segments = {'manage', 'form', 'create', 'home', 'static', 'media', "dashboard", "myprofile", "profile", 
-                                "public", "detail", "list", "view", "search", "api", "auth", "login", "signup", "logout"}
+                                "public", "interaction", "detail", "list", "view", "search", "api", "auth", "login", "signup", "logout"}
         if any(segment in url.lower() for segment in public_path_segments):
             return True
             

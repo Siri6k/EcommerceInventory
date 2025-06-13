@@ -10,6 +10,7 @@ from .controller.ProductController import (
     ProductQuestionsListView,
     CreateProductQuestionView,
     UpdateProductQuestionView,
+    product_interaction,
 )
 from .controller.CategoryController import CategoryListView
 
@@ -27,6 +28,6 @@ urlpatterns = [
     path("productQuestions/<str:product_id>/", ProductQuestionsListView.as_view(), name="product-question-list"),
     path("createProductQuestion/<str:product_id>/", CreateProductQuestionView.as_view(), name="create-product-question"),
     path("updateProductQuestion/<str:product_id>/<pk>/", UpdateProductQuestionView.as_view(), name="update-product-question"),
-    
-      
+    path("interaction/<str:product_id>/", product_interaction, name="product-interaction"),
+         
 ]

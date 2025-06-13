@@ -122,17 +122,24 @@ WSGI_APPLICATION = "EcommerceInventory.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-host = os.getenv('DATABASE_HOST')
-if DEBUG:
-   host = 'localhost'
+dbhost = os.getenv('DATABASE_HOST')
+dbname = os.getenv('DATABASE_NAME')
+dbuser = os.getenv('DATABASE_USER')
+dbpassword = os.getenv('DATABASE_PASSWORD')
 
+if DEBUG:
+   dbhost = 'localhost'
+   dbname = 'ecommerce'
+   dbuser = 'ecommerce'
+   dbpassword = 'test123456@cool'
+   
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv('DATABASE_NAME'),  # Default database name
-        "USER": os.getenv('DATABASE_USER'),         # Default user
-        "PASSWORD": os.getenv('DATABASE_PASSWORD'),     # Default empty password
-        "HOST": host,  
+        "NAME": dbname,  
+        "USER": dbuser,         # Default user
+        "PASSWORD": dbpassword,     # Default empty password
+        "HOST": dbhost,
         "PORT": os.getenv('DATABASE_PORT'),         # Default port
     }
 }

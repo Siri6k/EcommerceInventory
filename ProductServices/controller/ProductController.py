@@ -5,9 +5,18 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from UserServices.models import Users
 from EcommerceInventory.Helpers import (
-    CommonListAPIMixin, CustomPageNumberPagination, renderResponse
+    CommonListAPIMixin, CustomPageNumberPagination, get_client_ip, renderResponse
 )
-from ProductServices.models import ProductQuestions, ProductReviews, Products
+from ProductServices.models import ProductInteraction, ProductQuestions, ProductReviews, Products
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.utils.decorators import method_decorator
+from django.http import JsonResponse
+import json
+
+
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     review_user_id= serializers.SerializerMethodField()
@@ -41,6 +50,9 @@ class ProductSerializer(serializers.ModelSerializer):
     category_id= serializers.SerializerMethodField()
     domain_user_id= serializers.SerializerMethodField()
     added_by_user_id= serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    share_count = serializers.SerializerMethodField()
+    view_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Products
@@ -65,6 +77,15 @@ class ProductSerializer(serializers.ModelSerializer):
             "city": user.city
 
         }
+    
+    def get_like_count(self, obj):
+        return obj.like_count
+
+    def get_share_count(self, obj):
+        return obj.share_count
+
+    def get_view_count(self, obj):
+        return obj.view_count
 
 class ProductListSerializer(serializers.ModelSerializer):
     category_id= serializers.SerializerMethodField()
@@ -298,3 +319,51 @@ class ProductDetailView(generics.RetrieveAPIView):
             message="Product details retrieved successfully.",
             status=200
         )
+    
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def product_interaction(request, product_id):
+    try:
+        data = json.loads(request.body)
+        user = request.user if request.user.is_authenticated else None
+        anon_id = data.get("anon_id")
+        action = data.get("action", "like")
+
+        if not action or action not in ["like", "share", "view"]:
+            return JsonResponse({"message": "Invalid action."}, status=400)
+
+        ip = get_client_ip(request)
+
+        try:
+            product = Products.objects.get(id=product_id)
+        except Products.DoesNotExist:
+            return JsonResponse({"message": "Product not found."}, status=404)
+
+        filters = {'product': product, 'action': action}
+        if user:
+            filters['user'] = user
+        else:
+            filters['anon_id'] = anon_id
+            filters['ip_address'] = ip
+
+        interaction = ProductInteraction.objects.filter(**filters).first()
+
+        if interaction and action == "like":
+            interaction.delete()
+            return JsonResponse({"message": f"You unliked {product.name}!"}, status=200)
+
+        if not interaction:
+            ProductInteraction.objects.create(
+                product=product,
+                action=action,
+                user=user,
+                anon_id=anon_id if not user else None,
+                ip_address=None if user else ip
+            )
+
+        return JsonResponse({"message": f"You {action}d {product.name}!"}, status=201)
+
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)

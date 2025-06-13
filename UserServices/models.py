@@ -2,10 +2,12 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password
 
+import uuid
+
 
 # Create your models here.
 class Users(AbstractUser):
-   
+    anon_id = models.CharField(max_length=255, null=True, blank=True)
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
@@ -290,7 +292,8 @@ class Visit(models.Model):
     ip_address = models.CharField(max_length=45)  # IPv6 support
     cookies = models.JSONField()  # Stockage JSON des cookies
     user_agent = models.TextField()
+    anon_id = models.CharField(max_length=255, null=True, blank=True)
     visit_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"IP: {self.ip_address} - Date: {self.visit_date}"
+        return f"IP: {self.anon_id} - Date: {self.visit_date}"

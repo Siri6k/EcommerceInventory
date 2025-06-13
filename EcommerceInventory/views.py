@@ -112,6 +112,8 @@ class FileUploadViewInCloudinary(APIView):
 @require_POST
 @csrf_exempt  # Only use this decorator if you've properly configured CORS
 def save_visit(request):
+    if request.user:
+        return JsonResponse({'message': 'ok'}, status=200)
     try:
         # Get client IP (handling proxy headers securely)
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -125,12 +127,14 @@ def save_visit(request):
         cache_key = f'visit_limit_{ip_address}'
         if cache.get(cache_key):
             return JsonResponse({'error': 'Too many requests. Please wait 1 minute.'}, status=429)
-        cache.set(cache_key, True, timeout=60)  # 1 minute timeout
+        cache.set(cache_key, True, timeout=30)  # 0.5 minute timeout
         
         # Parse JSON data safely
         try:
             data = json.loads(request.body)
             cookies = data.get('cookies', {})
+            anon_id = data.get('anon_id', "")
+
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
         
@@ -143,12 +147,13 @@ def save_visit(request):
         
         # Save to database
         Visit.objects.create(
+            anon_id=anon_id,
             ip_address=ip_address,
             cookies=cookies,
             user_agent=user_agent
         )
         
-        return JsonResponse({'message': 'Visit recorded successfully'}, status=201)
+        return JsonResponse({'message': 'ok'}, status=201)
     
     except Exception as e:
         if settings.DEBUG:
