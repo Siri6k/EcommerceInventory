@@ -203,8 +203,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "UserServices.Users"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),  # 1 dayc
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # 1 day
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # 1 day
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 7 days
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
@@ -220,6 +220,8 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),  # 1 day
+    "TOKEN_OBTAIN_SERIALIZER": "UserServices.serializers.MyTokenObtainPairSerializer",
+    "TOKEN_REFRESH_SERIALIZER": "UserServices.serializers.MyTokenRefreshSerializer",
 }
 
 # AWS S3 settings
