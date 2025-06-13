@@ -30,9 +30,7 @@ class SignupAPIView(APIView):
         address = request.data.get("address")
         province = request.data.get("province")
         city = request.data.get("city")
-
-
-        
+        anon_id = request.data.get("anon_id")
 
         emailcheck = Users.objects.filter(email=email)
         if emailcheck.exists():
@@ -60,6 +58,7 @@ class SignupAPIView(APIView):
             last_name=last_name,
             province=province,
             city=city,
+            anon_id=anon_id,
         )
 
         if request.data.get("domain_user_id"):
