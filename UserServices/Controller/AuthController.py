@@ -53,7 +53,6 @@ class SignupAPIView(APIView):
             address=address,
             phone_number=phone_number,
             whatsapp_number=whatsapp_number,
-            address=address,
             first_name=first_name,
             last_name=last_name,
             province=province,
@@ -88,6 +87,7 @@ class SignupAPIView(APIView):
         access["role"] = user.role
         access["phone_number"] = user.phone_number if user.phone_number else ""
         access["address"] = user.address if user.address else ""
+        access["anon_id"] = user.anon_id if user.anon_id else ""
 
 
          #Save default permissions (dashboard, analytics and settings)
@@ -133,6 +133,8 @@ class LoginAPIView(APIView):
             access["role"] = user.role
             access["phone_number"] = user.phone_number if user.phone_number else ""
             access["address"] = user.address if user.address else ""
+            access["anon_id"] = user.anon_id if user.anon_id else ""
+
 
 
             ip_address = request.META.get('HTTP_X_FORWARDED_FOR')

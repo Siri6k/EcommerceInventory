@@ -275,7 +275,8 @@ class UpdateUserFormController(APIView):
 
         fields = getDynamicFormFields(
             model_instance, request.user.domain_user_id,
-            skip_fields=["account_status", "role", "plan_type"])
+            skip_fields=["account_status", "role", "plan_type",
+                         "anon_id"])
         
         return renderResponse(
             data=fields, 
