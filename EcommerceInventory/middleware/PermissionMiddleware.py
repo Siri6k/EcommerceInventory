@@ -86,33 +86,69 @@ class PermissionMiddleware:
         if normalized_url in self.public_urls:
             return True
 
-        # Check dynamic patterns like <pk> or <id>
         for public_url in self.public_urls:
-            # Convert <pk>, <id> or <slug> style to regex
-            pattern = re.sub(r'<[^>]+>', '[^/]+', public_url)
-            pattern = pattern.rstrip('/') + '/?$'  # match with or without trailing slash
+            pattern = public_url.rstrip('/') + '/'
+            pattern = pattern.replace('.', r'\.')  # Escape dots
+
+            # Replace Django-like path converters with regex
+            pattern = re.sub(r'<int:[^>]+>', r'\\d+', pattern)  # Note double backslash
+            pattern = re.sub(r'<str:[^>]+>', r'[^/]+', pattern)
+            pattern = re.sub(r'<slug:[^>]+>', r'[-a-zA-Z0-9_]+', pattern)
+            pattern = re.sub(r'<[^>]+>', r'[^/]+', pattern)  # fallback: <pk>, <id>, etc.
+
+            pattern += '/?'  # optional trailing slash
+
             if re.fullmatch(pattern, normalized_url):
                 return True
 
-        return False
-
-        
-    
+        return False 
     
     def find_matching_module(self, url):
-        """Find module with URL pattern matching"""
-        # Convert numeric IDs to pattern
-        pattern = re.sub(r'/\d+/', '/[^/]+/', url)
-        pattern = re.sub(r'/\d+$', '/[^/]+', pattern)
-        
-        # Escape special regex chars except our patterns
-        pattern = re.escape(pattern)
-        pattern = pattern.replace('\\[^\\/\\]\\+', '[^/]+')
-        
-        return ModuleUrls.objects.filter(
-            Q(url__iregex=f'^{pattern}$') |
-            Q(url__iregex=f'^{pattern}/$')
-        ).first()
+        """
+        Match incoming URL with patterns stored in the database, like:
+        /api/getForm/<str:modelName>/<str:id>/
+        /api/products/detail/<pk>/
+        """
+
+        # Normalize trailing slash
+        if not url.endswith("/"):
+            url += "/"
+
+        # List of Django-style path converters and their regex equivalents
+        # Note: Using double backslashes for regex patterns
+        placeholder_patterns = {
+            r"<int:[^>/]+>": r"\\d+",  # Double backslash
+            r"<str:[^>/]+>": r"[^/]+",
+            r"<slug:[^>/]+>": r"[-a-zA-Z0-9_]+",
+            r"<uuid:[^>/]+>": r"[0-9a-fA-F-]+",
+            r"<[^>/]+>": r"[^/]+",  # fallback for <pk>, <id>, etc.
+        }
+
+        # Fetch all candidate patterns from DB
+        all_patterns = ModuleUrls.objects.all()
+
+        for pattern_obj in all_patterns:
+            pattern = pattern_obj.url
+
+            # Add trailing slash for consistency
+            if not pattern.endswith("/"):
+                pattern += "/"
+
+            # Escape regex special characters in the pattern
+            escaped_pattern = re.escape(pattern)
+
+            # Replace escaped placeholders with regex
+            for placeholder, regex in placeholder_patterns.items():
+                escaped_placeholder = re.escape(placeholder)
+                # Use raw string for the replacement
+                escaped_pattern = re.sub(escaped_placeholder, regex.replace('\\', r'\\'), escaped_pattern)
+
+            # Compile and test the regex
+            if re.fullmatch(escaped_pattern, url):
+                return pattern_obj
+
+        return None
+
     
     def _has_permission(self, user, module):
         """Check if user has permission for the module"""
