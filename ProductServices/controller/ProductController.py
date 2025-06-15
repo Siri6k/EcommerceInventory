@@ -311,12 +311,28 @@ class ProductDetailView(generics.RetrieveAPIView):
             questions = []
         else:
             questions = ProductQuestionSerializer(questions, many=True).data
+
+        like = ProductInteraction.objects.filter(
+            product=instance,
+            action="like",
+            user=request.user if request.user.is_authenticated else None,
+            anon_id=request.data.get("anon_id") if not request.user.is_authenticated else None
+        ).exists()
+        
+        share = ProductInteraction.objects.filter(
+            product=instance,
+            action="share",
+            user=request.user if request.user.is_authenticated else None,
+            anon_id=request.data.get("anon_id") if not request.user.is_authenticated else None
+        ).exists()
         
         return renderResponse(
             data={
                 "product": product,
                 "reviews": reviews,
-                "questions": questions
+                "questions": questions,
+                "like": like,
+                "share": share
             },
             message="Product details retrieved successfully.",
             status=200

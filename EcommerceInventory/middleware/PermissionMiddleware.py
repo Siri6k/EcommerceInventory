@@ -4,6 +4,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 import re
 from django.db.models import Q
 from urllib.parse import urlparse
+from django.conf import settings
 
 
 class PermissionMiddleware:
@@ -14,6 +15,7 @@ class PermissionMiddleware:
     def _load_public_urls(self):
         """Preload public URLs from database and hardcoded ones"""
         db_public_urls = list(ModuleUrls.objects.filter(module__isnull=True).values_list('url', flat=True))
+        print(db_public_urls)
         hardcoded_public_urls = [
             '/api/auth/login/',
             '/api/auth/signup/',
@@ -24,15 +26,21 @@ class PermissionMiddleware:
             '/api/docs/',
             '',
             '/api/products/all/',
-            '/api/products/detail/<pk>/',
+            '/api/products/detail/*/',
             '/api/save-visit/',
             '/api/uploads/',
         ]
         return set(db_public_urls + hardcoded_public_urls)
     
     def __call__(self, request):
+        self._load_public_urls()  # Ensure public URLs are loaded
+        # Process the request
         response = self.get_response(request)
         current_url = request.path
+
+        # Autoriser automatiquement tous les liens frontend (hors API)
+        if not current_url.startswith('/api/') and not settings.DEBUG:
+            return self.get_response(request)
         
         # Skip public URLs
         if self.is_public_endpoint(current_url):
@@ -71,31 +79,25 @@ class PermissionMiddleware:
             and user.domain_user_id.id == user.id)
     
     def is_public_endpoint(self, url):
-        """Improved public endpoint detection"""
-        # Normalize URL for comparison
+        """Check if the URL matches a known public URL pattern"""
         normalized_url = url.rstrip('/') + '/'
-        
-        # Check exact matches
+
+        # Check exact match
         if normalized_url in self.public_urls:
             return True
-            
-        # Check pattern matches (for URLs with IDs, etc.)
+
+        # Check dynamic patterns like <pk> or <id>
         for public_url in self.public_urls:
-            if public_url.endswith('*'):
-                if url.startswith(public_url[:-1]):
-                    return True
-            elif public_url.endswith('/+'):
-                base_url = public_url[:-2]
-                if url.startswith(base_url):
-                    return True
-        
-        # Special cases (could be moved to config)
-        public_path_segments = {'manage', 'form', 'create', 'home', 'static', 'media', "dashboard", "myprofile", "profile", 
-                                "public", "interaction", "detail", "list", "view", "search", "api", "auth", "login", "signup", "logout"}
-        if any(segment in url.lower() for segment in public_path_segments):
-            return True
-            
+            # Convert <pk>, <id> or <slug> style to regex
+            pattern = re.sub(r'<[^>]+>', '[^/]+', public_url)
+            pattern = pattern.rstrip('/') + '/?$'  # match with or without trailing slash
+            if re.fullmatch(pattern, normalized_url):
+                return True
+
         return False
+
+        
+    
     
     def find_matching_module(self, url):
         """Find module with URL pattern matching"""
