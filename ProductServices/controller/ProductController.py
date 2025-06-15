@@ -126,8 +126,10 @@ class ProductListView(generics.ListAPIView):
         queryset = Products.objects.filter(
             added_by_user_id=self.request.user.added_by_user_id.id
         )
+        if self.request.user.role == 'Super Admin':
+            queryset = Products.objects.all()
         return queryset
-    
+
      #using the mixin to add search and ordering functionality
     @CommonListAPIMixin.common_list_decorator(ProductSerializer)
     def list(self, request, *args, **kwargs):
