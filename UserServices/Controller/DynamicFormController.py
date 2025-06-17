@@ -211,9 +211,18 @@ class DynamicFormController(APIView):
         else:
             model_instance = model_class()
 
-        fields = getDynamicFormFields(
-            model_instance, request.user.domain_user_id)
-        
+        # Fetching dynamic form fields based on the model instance and user
+        # Exclude 'whatsapp_number' field for 'product' model if user is not 'Super Admin'
+        if modelName == "product" and request.user.role != "Super Admin":
+            fields = getDynamicFormFields(
+                model_instance, request.user.domain_user_id,
+                skip_fields=["whatsapp_number"]
+            )
+        else:
+            fields = getDynamicFormFields(
+                model_instance, request.user.domain_user_id
+            )
+
         return renderResponse(
             data=fields, 
             message="Form fetched successfully"

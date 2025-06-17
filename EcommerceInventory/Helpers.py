@@ -63,6 +63,7 @@ def getExcludeFields():
         "is_superuser",
         "is_staff",
         "date_joined",
+        "sku",
     ]
 def getDynamicFormFields(model_instance, domain_user_id, skip_related=[],skip_fields=[]):
     fields = {

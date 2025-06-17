@@ -90,22 +90,27 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     category_id= serializers.SerializerMethodField()
     added_by_user_id= serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
     class Meta:
         model = Products
         fields = ["id", "name", 
                   "category_id", "image", 
                   "description",
                   "added_by_user_id",
+                    "like_count",
                   "price", "quantity",
+                  "whatsapp_number",
                   "updated_at"]
         
     def get_category_id(self, obj):
         return "#"+str(obj.category_id.id)+" "+obj.category_id.name
+    def get_like_count(self, obj):
+        return obj.like_count  
         
     def get_added_by_user_id(self, obj):
         user = obj.added_by_user_id
         if not user:
-            return None
+            return None   
         
         return {
             "id": user.id,

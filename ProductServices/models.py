@@ -1,3 +1,4 @@
+from re import U
 from django.db import models
 
 from UserServices.models import Users
@@ -44,7 +45,8 @@ class Products(models.Model):
     sku = models.CharField(max_length=255, blank=True, null=True)
     quantity = models.IntegerField(default=1)
     description = models.TextField()
-
+    
+    whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
     sku = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(
         max_length=255,
@@ -78,12 +80,30 @@ class Products(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # on sauvegarde pour obtenir l'ID
+        # creer un review de produit si l'ID n'est pas encore défini
+        ProductReviews.objects.get_or_create(
+            product_id=self,
+            defaults={
+                'review_images': [],
+                'rating': 2.5,  # Note par défaut
+                'reviews': "Produit ajouté automatiquement",
+                'status': 'ACTIVE',
+                'domain_user_id': self.domain_user_id,
+                'review_user_id': self.added_by_user_id,
+            }
+        )
         if not self.sku:
             prefix = "SKU"
             cat_part = (self.category_id.name[:5].upper() if self.category_id and self.category_id.name else "UNCAT")
             name_part = (self.name[:5].upper() if self.name else "NONAM")
             self.sku = f"{prefix}-{cat_part}-{name_part}-00{self.id}"
             super().save(update_fields=["sku"])  # mise à jour uniquement du champ SKU
+        if not self.whatsapp_number:
+            self.whatsapp_number = Users.objects.get(id=self.added_by_user_id.id).whatsapp_number
+            super().save(update_fields=["whatsapp_number"])  # mise à jour uniquement du champ WhatsApp
+        if not self.city:
+            self.city = Users.objects.get(id=self.added_by_user_id.id).city or "Kinshasa"
+            super().save(update_fields=["city"])
 
     @property
     def like_count(self):
