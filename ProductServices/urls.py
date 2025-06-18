@@ -12,11 +12,13 @@ from .controller.ProductController import (
     UpdateProductQuestionView,
     product_interaction,
 )
-from .controller.CategoryController import CategoryListView
+from .controller.CategoryController import AllCategoryListView, CategoryListView
 
 
 urlpatterns = [
     path("categories/", CategoryListView.as_view(), name="category-list"),
+    path("categories/all/", AllCategoryListView.as_view(), name="all-category-list"),
+
     path("", ProductListView.as_view(), name="product-list"),
     path("all/", ProductAllListView.as_view(), name="all-product-list"),
     path('detail/<pk>/', ProductDetailView.as_view(), name='product-detail'),

@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from UserServices.models import Users
 from EcommerceInventory.Helpers import (
-    CommonListAPIMixin, CustomPageNumberPagination, get_client_ip, renderResponse
+    CommonListAPIMixin, CommonListAPIMixinWithFilter, CustomPageNumberPagination, get_client_ip, renderResponse
 )
 from ProductServices.models import ProductInteraction, ProductQuestions, ProductReviews, Products
 
@@ -16,7 +16,7 @@ from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 import json
 
-
+from django.db.models import Count, Q
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     review_user_id= serializers.SerializerMethodField()
@@ -79,34 +79,45 @@ class ProductSerializer(serializers.ModelSerializer):
         }
     
     def get_like_count(self, obj):
-        return obj.like_count
+     return obj.like_count or 0
 
     def get_share_count(self, obj):
-        return obj.share_count
+        return obj.share_count or 0
 
     def get_view_count(self, obj):
-        return obj.view_count
+        return obj.view_count or 0
 
 class ProductListSerializer(serializers.ModelSerializer):
     category_id= serializers.SerializerMethodField()
     added_by_user_id= serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
+    share_count = serializers.SerializerMethodField()
+    view_count = serializers.SerializerMethodField()    
     class Meta:
         model = Products
         fields = ["id", "name", 
                   "category_id", "image", 
                   "description",
-                  "added_by_user_id",
-                    "like_count",
+                  "added_by_user_id", "city",
+                  "like_count",
+                  "share_count",
+                  "view_count",
                   "price", "quantity",
                   "whatsapp_number",
                   "updated_at"]
         
     def get_category_id(self, obj):
         return "#"+str(obj.category_id.id)+" "+obj.category_id.name
+    
     def get_like_count(self, obj):
-        return obj.like_count  
-        
+        return obj.like_count or 0
+
+    def get_share_count(self, obj):
+        return obj.share_count or 0
+
+    def get_view_count(self, obj):
+        return obj.view_count or 0
+
     def get_added_by_user_id(self, obj):
         user = obj.added_by_user_id
         if not user:
@@ -129,10 +140,13 @@ class ProductListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Products.objects.filter(
-            added_by_user_id=self.request.user.added_by_user_id.id
+            added_by_user_id=self.request.user.added_by_user_id.id,
+            status="ACTIVE",
         )
         if self.request.user.role == 'Super Admin':
             queryset = Products.objects.all()
+
+        
         return queryset
 
      #using the mixin to add search and ordering functionality
@@ -270,21 +284,21 @@ class UpdateProductQuestionView(generics.UpdateAPIView):
         else:
             serializer.save()
     
-
-
 class ProductAllListView(generics.ListAPIView):
     serializer_class = ProductListSerializer
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        queryset = Products.objects.all()
+        queryset = Products.objects.filter(
+            status="ACTIVE",
+        )
+        
         return queryset
-    
-     #using the mixin to add search and ordering functionality
-    @CommonListAPIMixin.common_list_decorator(ProductListSerializer)
+
+    # using the mixin to add search and ordering functionality
+    @CommonListAPIMixinWithFilter.common_list_decorator(ProductListSerializer)
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
 
 
 class ProductDetailView(generics.RetrieveAPIView):

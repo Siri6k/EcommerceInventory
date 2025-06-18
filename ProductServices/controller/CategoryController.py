@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models import Q
 from django.db import models
+from rest_framework.views import APIView
+
 
 from EcommerceInventory.Helpers import (
     CommonListAPIMixin, CustomPageNumberPagination, renderResponse
@@ -46,6 +48,18 @@ class CategoryListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
  
+class AllCategorySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Categories
+        fields = ["id", "name"]
 
+   
 
+class AllCategoryListView(APIView):
+
+    def get(self, request):
+        categories = Categories.objects.all()
+        serializer = AllCategorySerializer(categories, many=True)
+        return renderResponse(data=serializer.data, message="All list Categories", status=200)
 

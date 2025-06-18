@@ -351,7 +351,6 @@ class CommonListAPIMixinWithFilter:
 
                 page = self.paginate_queryset(queryset)
 
-                print(page)
 
                 if page is not None:
                     serializer = self.get_serializer(page, many=True)
@@ -368,6 +367,38 @@ class CommonListAPIMixinWithFilter:
                     page_size=len(data)
                     total_items=len(data)
                 
+                EXCLUDE_FROM_FILTER_FIELDS = ['password', 
+                                              'last_login', 
+                                              'is_active', 
+                                              'is_superuser',
+                                                'is_staff',
+                                                'date_joined',
+                                                'social_media_links',
+                                                'addition_details',
+                                                'created_at',
+                                                'updated_at',
+                                                'last_ip',
+                                                'last_device',
+                                                'id',
+                                                'quantity',
+                                                'description',
+                                                "whatsapp_number",
+                                                'added_by_user_id',
+                                              'email', 
+                                              'image',
+                                              'profile_pic',
+                                              ]
+
+                meta = serializer_class.Meta
+                model_fields = meta.model._meta.fields
+
+                fields = getattr(meta, "fields", [])
+                if fields == "__all__":
+                    fields = [f.name for f in model_fields]
+
+                # Exclure les champs uniquement pour filterFields
+                filter_fields_names = [f for f in fields if f not in EXCLUDE_FROM_FILTER_FIELDS]
+
                 filterFields = [
                     {
                         "key": field.name,
@@ -376,9 +407,10 @@ class CommonListAPIMixinWithFilter:
                             for choice in field.choices
                         ] if field.choices else None
                     }
-                    for field in serializer_class.Meta.model._meta.fields
-                    if field.name in serializer_class.Meta.fields 
+                    for field in model_fields
+                    if field.name in filter_fields_names
                 ]
+
 
                 return renderResponse(
                     data={

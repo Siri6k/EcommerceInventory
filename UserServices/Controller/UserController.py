@@ -23,9 +23,11 @@ class UserSerializerWithFilters(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(format='%dth %B %Y, %H:%M', read_only=True)
     domain_user_id=serializers.SerializerMethodField()
     added_by_user_id=serializers.SerializerMethodField()
+    
     class Meta:
         model = Users
         fields = '__all__'
+
     def get_domain_user_id(self, obj):
         if obj.domain_user_id:
             return (
@@ -58,7 +60,7 @@ class UserWithFiltersListView(generics.ListAPIView):
     pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
-        queryset = Users.objects.all()
+        queryset = Users.objects.all().order_by('-id')
         return queryset
     
      #using the mixin to add search and ordering functionality

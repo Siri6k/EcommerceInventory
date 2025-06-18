@@ -216,7 +216,7 @@ class DynamicFormController(APIView):
         if modelName == "product" and request.user.role != "Super Admin":
             fields = getDynamicFormFields(
                 model_instance, request.user.domain_user_id,
-                skip_fields=["whatsapp_number"]
+                skip_fields=["whatsapp_number", "status"]
             )
         else:
             fields = getDynamicFormFields(
