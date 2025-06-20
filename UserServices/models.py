@@ -11,7 +11,12 @@ class Users(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField(unique=True)
+    # social authentication fields
+    social_provider = models.CharField(max_length=50, blank=True, null=True)
+    social_uid = models.CharField(max_length=255, blank=True, null=True)
+    social_extra_data = models.JSONField(blank=True, null=True)
+    # contact information
+    email = models.EmailField(null=True, blank=True, unique=True)
     profile_pic = models.JSONField()
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)

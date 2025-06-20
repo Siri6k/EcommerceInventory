@@ -11,8 +11,11 @@ from EcommerceInventory.permission import IsSuperAdmin
 from django.utils import timezone
 
 
+
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
+from allauth.socialaccount.models import SocialAccount
 
 class SignupAPIView(APIView):
     def post(self, request):
@@ -200,4 +203,5 @@ class SuperAdminCheckApi(APIView):
             message="This is a Super Admin API!",
             status=status.HTTP_400_BAD_REQUEST
         )
+
 

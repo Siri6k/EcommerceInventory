@@ -17,6 +17,12 @@ from EcommerceInventory.views import FileUploadViewInS3, index, save_visit, File
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+
+    # Admin URL for the Django admin interface
+    path("auth/", include("dj_rest_auth.urls")),
+    path("auth/registration/", include("dj_rest_auth.registration.urls")),
+    path("auth/google/", include('allauth.socialaccount.providers.google.urls')),  # <== parfois utile
+
     path("api/auth/", include("UserServices.urls")),
     path(
         "api/getForm/<str:modelName>/",

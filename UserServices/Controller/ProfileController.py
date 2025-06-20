@@ -104,9 +104,10 @@ class UpdateUserFormController(APIView):
         field_info = model_class._meta.fields
         model_fields = [field.name for field in field_info]
         exclude_fields = getExcludeFields()
-        
 
-
+        if user.social_provider == "google":
+            exclude_fields.append("email")
+            exclude_fields.append("password")
 
         required_fields = [
             field.name
@@ -273,10 +274,18 @@ class UpdateUserFormController(APIView):
         else:
             model_instance = model_class()
 
+        skip_fields=["account_status", "role", "plan_type",
+                         "anon_id", "social_provider", "social_uid",
+                         "social_media_links", "addition_details", 
+                         "social_extra_data"]
+        if request.user.social_provider == "google":
+            skip_fields.append("email")
+            skip_fields.append("password")
+
+        
         fields = getDynamicFormFields(
             model_instance, request.user.domain_user_id,
-            skip_fields=["account_status", "role", "plan_type",
-                         "anon_id"])
+            skip_fields=skip_fields)
         
         return renderResponse(
             data=fields, 

@@ -1,10 +1,13 @@
-from django.urls import path
+from django.urls import path, include
 from UserServices.Controller import ProfileController
-from UserServices.Controller import AuthController, UserController
+from UserServices.Controller import AuthController, UserController, SocialController
 from UserServices.views import MyTokenRefreshView, MyTokenObtainPairView
 
-
 urlpatterns = [
+
+    path('social/google/', SocialController.GoogleLoginAPIView.as_view(), name='google_login'), 
+
+
     path('token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', MyTokenRefreshView.as_view(), name='token_refresh'),
 

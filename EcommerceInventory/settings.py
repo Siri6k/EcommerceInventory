@@ -10,8 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from math import e
+from operator import ge
 from pathlib import Path
 from datetime import timedelta
+
 from dotenv import load_dotenv
 import os
 
@@ -41,16 +44,30 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles"
+    "django.contrib.staticfiles",
+    'django.contrib.sites',
 ]
 
+# Third-party applications
+# These are the apps that you have installed from third-party sources, such as PyPI or
+
 THIRD_PARTY = [
-   'cloudinary', # For image upload
-   'cloudinary_storage', # For image upload
-   "rest_framework",
-   "rest_framework_simplejwt",
-   "corsheaders"
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',# For social authentication
+    'cloudinary', # For image upload
+    'cloudinary_storage', # For image upload
+    "rest_framework",
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    "rest_framework_simplejwt",
+    "corsheaders",
 ]
+# Local applications
+# These are the apps that you have created for your project
 
 LOCALS_APPS = [
    "UserServices",
@@ -61,7 +78,29 @@ LOCALS_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY + LOCALS_APPS
 
-# Middleware
+
+SITE_ID = 1
+
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Désactiver le modèle Token si on utilise uniquement JWT
+DJ_REST_AUTH = {
+    'USE_JWT': True,
+    'TOKEN_MODEL': None,  # <-- empêche l'erreur d'import inutile du TokenModel
+}
+
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
+ACCOUNT_SIGNUP_FIELDS = {
+    'email': {'required': True},
+    'username': {'required': True},
+    'password': {'required': True},
+}
+# Configuration de django-allauth
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 MIDDLEWARE = [
     
@@ -76,6 +115,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    'allauth.account.middleware.AccountMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -84,6 +124,21 @@ MIDDLEWARE = [
     "UserServices.middleware.UsersLogsMiddleware.UpdateLastLoginMiddleware",
 
 ]
+
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_CLIENT_SECRET,
+            'key': '',
+        }
+    }
+}
+
 
 REST_FRAMEWORK = {
    
@@ -98,6 +153,14 @@ CORS_ORIGIN_WHITELIST = [
     "https://niplan-market.onrender.com",
     "http://ec2-13-233-173-206.ap-south-1.compute.amazonaws.com"
 ]
+
+CORS_ORIGIN_WHITELIST += [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://niplan-market.onrender.com",
+    "http://ec2-13-233-173-206.ap-south-1.compute.amazonaws.com",
+]
+
 
 ROOT_URLCONF = "EcommerceInventory.urls"
 
@@ -145,9 +208,7 @@ DATABASES = {
 }
 
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -201,6 +262,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "UserServices.Users"
+
+REST_USE_JWT = True
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),  # 1 day
