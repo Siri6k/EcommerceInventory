@@ -1,6 +1,10 @@
 from django.urls import path
 
 from .controller.ProductController import (
+    LatestProductsListView,
+    MostLikedProductsListView,
+    MostSharedProductsListView,
+    MostViewedProductsListView,
     ProductAllListView,
     ProductDetailView,
     ProductListView,
@@ -31,5 +35,10 @@ urlpatterns = [
     path("createProductQuestion/<str:product_id>/", CreateProductQuestionView.as_view(), name="create-product-question"),
     path("updateProductQuestion/<str:product_id>/<pk>/", UpdateProductQuestionView.as_view(), name="update-product-question"),
     path("interaction/<str:product_id>/", product_interaction, name="product-interaction"),
+
+    path("latest/", LatestProductsListView.as_view(), name="product-latest"),
+    path("most-viewed/", MostViewedProductsListView.as_view(), name="product-most-viewed"),
+    path("most-liked/", MostLikedProductsListView.as_view(), name="product-most-liked"),
+    path("most-shared/", MostSharedProductsListView.as_view(), name="product-most-shared"),
          
 ]

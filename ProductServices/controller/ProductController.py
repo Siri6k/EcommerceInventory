@@ -291,8 +291,8 @@ class ProductAllListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Products.objects.filter(
             status="ACTIVE",
-        )
-        
+        ).order_by("-like_count",  "-share_count", "-view_count", "-updated_at")
+
         return queryset
 
     # using the mixin to add search and ordering functionality
@@ -377,6 +377,12 @@ def product_interaction(request, product_id):
             product = Products.objects.get(id=product_id)
         except Products.DoesNotExist:
             return JsonResponse({"message": "Product not found."}, status=404)
+        
+        # update product view, like and share count
+        product.view_count = product.interactions.filter(action='view').count()
+        product.like_count = product.interactions.filter(action='like').count()
+        product.share_count = product.interactions.filter(action='share').count()
+        product.save(update_fields=['view_count', 'like_count', 'share_count'])
 
         filters = {'product': product, 'action': action}
         if user:
@@ -404,3 +410,59 @@ def product_interaction(request, product_id):
 
     except Exception as e:
         return JsonResponse({"message": str(e)}, status=500)
+
+
+
+
+    
+class LatestProductsListView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        return Products.objects.filter(status="ACTIVE").order_by("-updated_at")
+
+    # using the mixin to add search and ordering functionality
+    @CommonListAPIMixinWithFilter.common_list_decorator(ProductListSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+class MostViewedProductsListView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        return Products.objects.filter(status="ACTIVE").order_by("-view_count")
+
+    # using the mixin to add search and ordering functionality
+    @CommonListAPIMixinWithFilter.common_list_decorator(ProductListSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class MostLikedProductsListView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    pagination_class = CustomPageNumberPagination
+
+    def get_queryset(self):
+        return Products.objects.filter(status="ACTIVE").order_by("-like_count")
+
+    # using the mixin to add search and ordering functionality
+    @CommonListAPIMixinWithFilter.common_list_decorator(ProductListSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+
+class MostSharedProductsListView(generics.ListAPIView):
+    serializer_class = ProductListSerializer
+    pagination_class = CustomPageNumberPagination
+    
+    def get_queryset(self):
+        return Products.objects.filter(status="ACTIVE").order_by("-share_count")
+
+    # using the mixin to add search and ordering functionality
+    @CommonListAPIMixinWithFilter.common_list_decorator(ProductListSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+

@@ -56,7 +56,10 @@ class Products(models.Model):
         choices=[("ACTIVE", "ACTIVE"), ("INACTIVE", "INACTIVE")],
         default="ACTIVE",
         )
-    additionnal_details = models.JSONField()
+    additionnal_details = models.JSONField(
+        blank=True,
+        null=True
+    )
     category_id = models.ForeignKey(
         Categories,
         on_delete=models.CASCADE,
@@ -78,11 +81,20 @@ class Products(models.Model):
         null=True,
         related_name="added_by_user_id_products",
     )
+     # champs compteurs réels
+    view_count = models.PositiveIntegerField(default=0, editable=False)
+    like_count = models.PositiveIntegerField(default=0, editable=False)
+    share_count = models.PositiveIntegerField(default=0, editable=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # on sauvegarde pour obtenir l'ID
+        # on recalcule une fois pour éviter les @property
+        self.view_count = self.interactions.filter(action='view').count()
+        self.like_count = self.interactions.filter(action='like').count()
+        self.share_count = self.interactions.filter(action='share').count()
         # creer un review de produit si l'ID n'est pas encore défini
         ProductReviews.objects.get_or_create(
             product_id=self,
@@ -108,17 +120,8 @@ class Products(models.Model):
             self.city = Users.objects.get(id=self.added_by_user_id.id).city or "Kinshasa"
             super().save(update_fields=["city"])
 
-    @property
-    def like_count(self):
-        return self.interactions.filter(action='like').count()
-
-    @property
-    def share_count(self):
-        return self.interactions.filter(action='share').count()
-    @property
-    def view_count(self):
-        return self.interactions.filter(action='view').count()
-
+    def defaultkey():
+        return "name"
     
 class ProductQuestions(models.Model):
     id = models.AutoField(primary_key=True)

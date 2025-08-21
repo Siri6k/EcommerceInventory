@@ -65,12 +65,12 @@ class DynamicFormController(APIView):
         if missing_fields:
             return renderResponse(
                 data=[
-                    f"Thefollowing field in required: {field}"
+                    f"The following field is required: {field}"
                     for field in missing_fields
                 ],
                 message="Validation Error", 
                 status=400
-            ),
+            )
            
         # creating a copy of post data
         fields = request.data.copy()
@@ -216,7 +216,7 @@ class DynamicFormController(APIView):
         if modelName == "product" and request.user.role != "Super Admin":
             fields = getDynamicFormFields(
                 model_instance, request.user.domain_user_id,
-                skip_fields=["whatsapp_number", "status"]
+                skip_fields=["whatsapp_number", "status", "additionnal_details"]
             )
         else:
             fields = getDynamicFormFields(
