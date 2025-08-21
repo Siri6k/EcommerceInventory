@@ -21,7 +21,10 @@ class Users(AbstractUser):
     password = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
-    address = models.TextField()
+    address = models.TextField(
+        blank=True,
+        null=True
+    )
     account_status = models.CharField(
         max_length=50,
         blank=True,
@@ -36,9 +39,9 @@ class Users(AbstractUser):
     city = models.CharField(max_length=50, 
                             blank=True, 
                             null=True,
-                            default="Kinshasa"
+                            default="Lubumbashi"
                             )
-    province = models.CharField(max_length=50, blank=True, null=True,  default="Kinshasa")
+    province = models.CharField(max_length=50, blank=True, null=True,  default="Haut-Katanga")
     country = models.CharField(
         max_length=50,
         blank=True,

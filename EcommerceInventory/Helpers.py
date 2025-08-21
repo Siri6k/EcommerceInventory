@@ -80,6 +80,7 @@ def getDynamicFormFields(model_instance, domain_user_id, skip_related=[],skip_fi
             continue
 
         label = field.name.replace("_", " ").title()
+        label = label.replace("Id", "")
         fielddata = {
             "name": field.name,
             "label": label,

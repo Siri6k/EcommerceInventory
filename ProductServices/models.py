@@ -44,7 +44,10 @@ class Products(models.Model):
     city = models.CharField(max_length=255, default="Kinshasa")
     sku = models.CharField(max_length=255, blank=True, null=True)
     quantity = models.IntegerField(default=1)
-    description = models.TextField()
+    description = models.TextField(
+        blank=True,
+        null=True
+    )
     
     whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
     sku = models.CharField(max_length=255, blank=True, null=True)
