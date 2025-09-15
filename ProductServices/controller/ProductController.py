@@ -104,6 +104,7 @@ class ProductListSerializer(serializers.ModelSerializer):
                   "view_count",
                   "price", "quantity",
                   "whatsapp_number",
+                  "currency",
                   "updated_at"]
         
     def get_category_id(self, obj):

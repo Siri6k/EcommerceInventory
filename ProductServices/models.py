@@ -67,6 +67,16 @@ class Products(models.Model):
         null=True,
         related_name="category_id_products",
     )
+    currency = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        default="CDF",
+        choices=(
+            ("CDF", "CDF"),
+            ("USD", "USD"),
+        ),
+    )
     domain_user_id = models.ForeignKey(
         Users,
         on_delete=models.CASCADE,
