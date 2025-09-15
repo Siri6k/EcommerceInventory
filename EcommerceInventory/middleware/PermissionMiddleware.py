@@ -15,7 +15,6 @@ class PermissionMiddleware:
     def _load_public_urls(self):
         """Preload public URLs from database and hardcoded ones"""
         db_public_urls = list(ModuleUrls.objects.filter(module__isnull=True).values_list('url', flat=True))
-        print(db_public_urls)
         hardcoded_public_urls = [
             '/api/auth/login/',
             '/api/auth/signup/',
