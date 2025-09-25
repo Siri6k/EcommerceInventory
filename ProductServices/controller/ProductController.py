@@ -130,8 +130,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             "username": user.username,
             "whatsapp_number": user.whatsapp_number,
             "country": user.country,
-            "city": user.city
-
+            "city": user.city,
+            "profile_pic": user.profile_pic,
         }
 
 class ProductListView(generics.ListAPIView):
