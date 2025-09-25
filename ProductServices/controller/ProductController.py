@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -467,3 +468,32 @@ class MostSharedProductsListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+class ProductsByUsernameView(generics.ListAPIView):
+    """
+    GET /products/by-username/?username=someone
+    Returns every ACTIVE product added by the user whose username is given.
+    Public endpoint – no auth required.
+    """
+    serializer_class = ProductListSerializer
+    pagination_class = CustomPageNumberPagination
+    authentication_classes = []        # open endpoint
+    permission_classes = []
+
+    def get_queryset(self):
+        username = self.kwargs["username"]
+        
+        if not username:
+            return Products.objects.none()          # or raise ValidationError
+
+        # fetch the user or return empty queryset
+        user = get_object_or_404(Users, username__iexact=username.strip())
+        print(user)
+        return Products.objects.filter(
+            added_by_user_id_id=user.id,
+            status="ACTIVE"
+        ).order_by("-updated_at")
+
+    # optional: keep search / ordering mixins
+    @CommonListAPIMixinWithFilter.common_list_decorator(ProductListSerializer)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

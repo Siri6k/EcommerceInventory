@@ -10,6 +10,7 @@ from .controller.ProductController import (
     ProductListView,
     ProductReviewListView,
     CreateProductReviewView,
+    ProductsByUsernameView,
     UpdateProductReviewView,
     ProductQuestionsListView,
     CreateProductQuestionView,
@@ -40,5 +41,6 @@ urlpatterns = [
     path("most-viewed/", MostViewedProductsListView.as_view(), name="product-most-viewed"),
     path("most-liked/", MostLikedProductsListView.as_view(), name="product-most-liked"),
     path("most-shared/", MostSharedProductsListView.as_view(), name="product-most-shared"),
+    path("shop/<str:username>/", ProductsByUsernameView.as_view(), name="products-by-username"),
          
 ]

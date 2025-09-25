@@ -25,6 +25,7 @@ class PermissionMiddleware:
             '/api/docs/',
             '',
             '/api/products/all/',
+            '/api/products/shop/<str:username>/',
             '/api/products/latest/',
             '/api/products/most-shared/',
             '/api/products/most-viewed/',
