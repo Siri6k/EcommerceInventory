@@ -24,6 +24,7 @@ class PermissionMiddleware:
             '/api/auth/refresh/',
             '/api/docs/',
             '',
+            '/api/products/categories/all/',
             '/api/products/all/',
             '/api/products/shop/<str:username>/',
             '/api/products/latest/',

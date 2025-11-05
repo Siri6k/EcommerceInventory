@@ -1,4 +1,5 @@
 import json
+from tkinter import N
 from django.db.models import ForeignKey
 
 from django.urls import URLPattern
@@ -307,6 +308,13 @@ def createParsedCreatedAtUpdatedAt(cls):
     cls.to_representation=to_representation
     return cls
 
+from decimal import Decimal, InvalidOperation
+
+def to_decimal_if_possible(value):
+    try:
+        return Decimal(value)
+    except (InvalidOperation, TypeError, ValueError):
+        return None
 
 class CommonListAPIMixinWithFilter:
     serializer_class = None
@@ -331,6 +339,37 @@ class CommonListAPIMixinWithFilter:
                 if filtered_params:
                     search_conditions = Q()
                     for key, value in filtered_params.items():
+                        if not value:
+                            continue
+                        
+                        # Filtre min/max pour les champs numériques
+                        if key.endswith("_max"):
+                            key = key.replace("_max", "")
+                            value = to_decimal_if_possible(value)
+                            if not value:
+                                continue
+                            search_conditions &= Q(**{f"{key}__lte": value})
+                            continue
+                        if key.endswith("_min"):
+                            key = key.replace("_min", "")
+                            value = to_decimal_if_possible(value)
+                            if not value:
+                                continue
+                            search_conditions &= Q(**{f"{key}__gte": value})
+                            continue
+                        # Gestion ForeignKey
+                        field = serializer_class.Meta.model._meta.get_field(key) if key in [f.name for f in serializer_class.Meta.model._meta.get_fields()] else None
+                        if field and field.get_internal_type() == "ForeignKey":
+                            # value peut être l'id du modèle lié
+                            search_conditions &= Q(**{f"{key}_id": value})
+                            continue
+
+                        # Texte ou égalité simple
+                        if isinstance(value, str) and "," in value:
+                            value = value.split(",")
+                            search_conditions &= Q(**{f"{key}__in": value})
+                        else:
+                            search_conditions &= Q(**{f"{key}": value})
                         ##search_conditions |= Q(**{f"{key}": value}) Or search
                         search_conditions &= Q(**{f"{key}": value}) # And search
                     queryset = queryset.filter(search_conditions)
@@ -381,10 +420,13 @@ class CommonListAPIMixinWithFilter:
                                                 'last_ip',
                                                 'last_device',
                                                 'id',
-                                                'quantity',
                                                 'description',
                                                 "whatsapp_number",
                                                 'added_by_user_id',
+                                                'like_count',
+                                                'share_count',
+                                                'view_count',
+                                                'price',
                                               'email', 
                                               'image',
                                               'profile_pic',
@@ -468,3 +510,4 @@ def get_client_ip(request):
     else:
         ip = request.META.get("REMOTE_ADDR")
     return ip
+
