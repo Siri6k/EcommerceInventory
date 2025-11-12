@@ -44,3 +44,4 @@ urlpatterns = [
     path("shop/<str:username>/", ProductsByUsernameView.as_view(), name="products-by-username"),
          
 ]
+
